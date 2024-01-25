@@ -6,6 +6,7 @@ import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/drop_off_sele
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/goods_selection.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/pickup_selection.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/receiver_info.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
 
 enum _OrderStep {
@@ -268,7 +269,7 @@ class BottomSheetNavigatorBuilderState
           onNext: _onNext,
         );
       case _OrderStep.confirmingOrder:
-        return DeliveryOptions(
+        return ConfirmingOrder(
           onNext: _onNext,
         );
       default:
