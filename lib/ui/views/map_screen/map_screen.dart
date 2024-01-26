@@ -1,23 +1,22 @@
 import 'package:bloomdeliveyapp/ui/views/map_screen/bottom_sheet_navigator.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_builder.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 final scaffoldKey2 = new GlobalKey<ScaffoldState>();
 
 class DeliveryMapScreen extends StatefulWidget {
-  int? seletedIndex = 0;
-  DeliveryMapScreen({Key? key, this.seletedIndex}) : super(key: key);
+  final mapController = MapController();
+
+  DeliveryMapScreen({Key? key}) : super(key: key);
+
   @override
   DeliveryMapScreenState createState() => DeliveryMapScreenState();
 }
 
 class DeliveryMapScreenState extends State<DeliveryMapScreen> {
   late double toolbarHeight;
-
-  late GoogleMapController mapController;
   final LatLng _initialPosition =
       LatLng(25.276987, 55.296249); // Example coordinates
   final bottomSheetNavigatorKey = GlobalKey<BottomSheetNavigatorBuilderState>();
@@ -25,70 +24,13 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
   final TextEditingController _searchController = TextEditingController();
   // Declare _userLocationMarker as nullable
   Marker? _userLocationMarker;
-  late LatLng _currentPosition;
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  void _showLocationServiceDialog() {
+    // TODO: implement this
   }
 
-  void _updatePosition(CameraPosition _position) {
-    setState(() {
-      _currentPosition = _position.target;
-      _searchController.text =
-          'Lat: ${_position.target.latitude}, Lng: ${_position.target.longitude}';
-    });
-  }
-
-  Future<void> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
-      mapController.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: _currentPosition,
-          zoom: 14.0,
-        ),
-      ));
-      _searchController.text = '${position.latitude}, ${position.longitude}';
-      _userLocationMarker = Marker(
-        markerId: MarkerId('currentLocation'),
-        position: _currentPosition,
-        draggable: true,
-        onDragEnd: (newPosition) {
-          _updatePosition(CameraPosition(target: newPosition, zoom: 14));
-        },
-      );
-    });
-  }
-
-  @override
-  void initState() {
-    _determinePosition();
-    super.initState();
+  void _showLocationPermissionDialog() {
+    // TODO: implement this
   }
 
   @override
@@ -97,17 +39,31 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
       key: scaffoldKey2,
       body: Stack(
         children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _initialPosition,
-              zoom: 14.0,
-            ),
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            markers: Set.of(
-                _userLocationMarker != null ? [_userLocationMarker!] : []),
-          ),
+          MapBuilder(
+              create: (_) => widget.mapController,
+              builder: (context, _) {
+                return GoogleMap(
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: true,
+                  compassEnabled: true,
+                  zoomControlsEnabled: false,
+                  myLocationEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: _initialPosition,
+                    zoom: 14.0,
+                  ),
+                  onMapCreated: (GoogleMapController controller) {
+                    widget.mapController.googleMapController = controller;
+                    widget.mapController.checkLocationPermission(_showLocationServiceDialog);
+                    widget.mapController.enableLocationService(_showLocationPermissionDialog);
+                    widget.mapController.goToUserLocation();
+                    // _setMapStyle();
+                  },
+                  markers: Set.of(_userLocationMarker != null
+                      ? [_userLocationMarker!]
+                      : []),
+                );
+              }),
           Positioned(
             bottom: 50,
             left: 20,
@@ -176,7 +132,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             children: [
               BottomSheetNavigator(
                 bottomSheetNavigatorKey: bottomSheetNavigatorKey,
-                // mapController: mapController,
+                mapController: widget.mapController,
                 onMapChanged: (value) {
                   setState(() {
                     // showRandomIconButton = value;
