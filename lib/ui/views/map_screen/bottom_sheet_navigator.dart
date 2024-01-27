@@ -1,68 +1,57 @@
 import 'dart:async';
-import 'dart:ui';
 
+import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/services/service_locator.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/adding_steps.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/create_request_dialog.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/delivery_options.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/drop_off_selection.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/goods_selection.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/pickup_selection.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/receiver_info.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
 
 enum _OrderStep {
   pickupSelection,
   dropOffSelection,
+  addingStops,
   receiverInfo,
   deliveryOptions,
   goodsSelection,
-  addingStops,
   confirmingOrder,
 }
 
 const _regularOrderSteps = [
   _OrderStep.pickupSelection,
   _OrderStep.dropOffSelection,
+  _OrderStep.addingStops,
   _OrderStep.receiverInfo,
   _OrderStep.deliveryOptions,
   _OrderStep.goodsSelection,
   _OrderStep.confirmingOrder,
 ];
 
-class BottomSheetNavigator extends StatelessWidget {
-  // final MapController mapController;
-  final Function(bool showRandomIcon) onMapChanged;
+class BottomSheetNavigator extends StatefulWidget {
+  final MapController mapController;
+  final Function() onMapChanged;
   final GlobalKey bottomSheetNavigatorKey;
 
-  const BottomSheetNavigator({
+  BottomSheetNavigator({
     Key? key,
-    // required this.mapController,
     required this.onMapChanged,
+    required this.mapController,
     required this.bottomSheetNavigatorKey,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BottomSheetNavigatorBuilder(
-      key: bottomSheetNavigatorKey,
-      // mapController: mapController,
-      onMapChanged: onMapChanged,
-    );
-  }
+  State<BottomSheetNavigator> createState() => BottomSheetNavigatorState();
 }
 
-class BottomSheetNavigatorBuilder extends StatefulWidget {
-  // final MapController mapController;
-  final Function(bool showRandomIcon) onMapChanged;
+class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
+  final createOrderViewModel = serviceLocator<CreateOrderViewModel>();
 
-  const BottomSheetNavigatorBuilder({Key? key, required this.onMapChanged})
-      : super(key: key);
-
-  @override
-  State<BottomSheetNavigatorBuilder> createState() =>
-      BottomSheetNavigatorBuilderState();
-}
-
-class BottomSheetNavigatorBuilderState
-    extends State<BottomSheetNavigatorBuilder> {
   int currentStep = 0;
   _OrderStep get step => _regularOrderSteps[currentStep];
 
@@ -71,34 +60,44 @@ class BottomSheetNavigatorBuilderState
     super.initState();
   }
 
+  void _onStepAdded() {
+    widget.mapController.addStep();
+    widget.onMapChanged();
+  }
+
   void _onNext() async {
+    if (currentStep == 0) {
+      createOrderViewModel.start = widget.mapController.cameraPosition;
+      widget.mapController.addPoint();
+      widget.onMapChanged();
+    }
+
+    if (currentStep == 1) {
+      createOrderViewModel.end = widget.mapController.cameraPosition;
+      widget.mapController.addPoint();
+      widget.onMapChanged();
+    }
+
     final numSteps = _regularOrderSteps.length;
-    if (currentStep + 1 == numSteps) {
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (_) => OrderCompletionPage(
-      //       orderBuilderBloc: context.read<OrderBuilderBloc>(),
-      //     ),
-      //   ),
-      // );
-    } else {
+    if (currentStep + 1 != numSteps) {
       setState(() {
         ++currentStep;
       });
     }
   }
 
+  void _createOrder(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CreateRequestDialog();
+      },
+    );
+  }
+
   Future<bool> _bottomSheetOnWillPop() async {
-    if (currentStep == 2) {
-      // context.read<OrderBuilderBloc>().add(
-      //       ClearDonationCentersSelection(),
-      //     );
-    } else if (currentStep == 3) {
-      // context.read<OrderBuilderBloc>().add(
-      //       ClearDonationOptions(),
-      //     );
-    }
-    widget.onMapChanged(currentStep == 3);
+    if (currentStep == 2) {}
+    widget.onMapChanged();
 
     if (currentStep > 0) {
       setState(() {
@@ -114,36 +113,34 @@ class BottomSheetNavigatorBuilderState
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // backgroundColor: context.theme.backgroundColor,
+        backgroundColor: Colors.white,
         title: Text(
-          "t.exit",
+          "Exiting app",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            // color: context.theme.primaryTextColor,
+            color: Colors.black,
           ),
         ),
         content: Text(
-          "t.youSureYouWantToExit",
+          "Are you sure you want to exit the app",
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            // color: context.theme.primaryTextColor,
+            color: Colors.black,
           ),
         ),
         actions: <Widget>[
-          // ignore: deprecated_member_use
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              "t.no",
+              "No",
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black),
             ),
           ),
-          // ignore: deprecated_member_use
           TextButton(
             onPressed: () {
               Future.delayed(const Duration(seconds: 1), () {
@@ -151,11 +148,11 @@ class BottomSheetNavigatorBuilderState
               });
             },
             child: Text(
-              "t.yes",
+              "Yes",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                // color: context.theme.primaryTextColor,
+                color: Colors.black,
               ),
             ),
           ),
@@ -166,81 +163,70 @@ class BottomSheetNavigatorBuilderState
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _bottomSheetOnWillPop,
-      child: Stack(
-        children: [
-          // if (requestedDetailsDonationCenter != null)
-          //   Positioned.fill(
-          //     child: BackdropFilter(
-          //       filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-          //       child: const SizedBox(),
-          //     ),
-          //   ),
-          GestureDetector(
-            onTap: currentStep == 0 ? _onNext : null,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32.0),
+    return Container(
+      key: widget.bottomSheetNavigatorKey,
+      // ignore: deprecated_member_use
+      child: WillPopScope(
+        onWillPop: _bottomSheetOnWillPop,
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: currentStep == 0 ? _onNext : null,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(32.0),
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  currentStep == 4 ? SizedBox() : Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const SizedBox(),
-                        Center(
-                          child: Container(
-                            width: 64,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    currentStep == 5
+                        ? SizedBox()
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const SizedBox(),
+                                Center(
+                                  child: Container(
+                                    width: 64,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(),
+                              ],
                             ),
                           ),
+                    AnimatedSize(
+                      alignment: Alignment.bottomCenter,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeIn,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 33.0,
+                          vertical: currentStep == 5 ? 0 : 18.0,
                         ),
-                        const SizedBox(),
-                      ],
-                    ),
-                  ),
-                  AnimatedSize(
-                    alignment: Alignment.bottomCenter,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 33.0,
-                        vertical: currentStep == 4 ? 0 : 18.0,
-                      ),
-                      child: Builder(
-                        builder: (context) {
-                          // if (requestedDetailsDonationCenter != null) {
-                          //   return BlocProvider(
-                          //     create: (_) =>
-                          //         FilterDataBloc()..add(LoadFilterData()),
-                          //     child: DonationCenterDetails(
-                          //         donationCenter:
-                          //             requestedDetailsDonationCenter!),
-                          //   );
-                          // } else {
-                          return _buildOrderStep(context);
-                          // }
-                        },
+                        child: Builder(
+                          builder: (context) {
+                            return _buildOrderStep(context);
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -250,10 +236,19 @@ class BottomSheetNavigatorBuilderState
       case _OrderStep.pickupSelection:
         return PickupSelection(
           onNext: _onNext,
+          currentPlace: widget.mapController.currentPlace,
         );
       case _OrderStep.dropOffSelection:
         return DropOffSelection(
           onNext: _onNext,
+          currentPlace: widget.mapController.currentPlace,
+        );
+      case _OrderStep.addingStops:
+        return AddingSteps(
+          mapController: widget.mapController,
+          onNext: _onNext,
+          onPointAdded: _onStepAdded,
+          currentPlace: widget.mapController.currentPlace,
         );
       case _OrderStep.receiverInfo:
         return ReceiverInfo(
@@ -268,8 +263,10 @@ class BottomSheetNavigatorBuilderState
           onNext: _onNext,
         );
       case _OrderStep.confirmingOrder:
-        return DeliveryOptions(
-          onNext: _onNext,
+        return ConfirmingOrder(
+          onNext: () {
+            _createOrder(context);
+          },
         );
       default:
         return Container(
