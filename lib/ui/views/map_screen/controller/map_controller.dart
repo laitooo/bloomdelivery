@@ -1,12 +1,44 @@
+import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
+import 'package:bloomdeliveyapp/services/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MapController extends ChangeNotifier {
-  Position? currentPosition;
-  final defaultMapZoom = 16.0;
+  final googleMapService = serviceLocator<GoogleMapsServices>();
+
+  LatLng? cameraPosition;
+  String? currentPlace;
+  Position? currentUserPosition;
   late GoogleMapController googleMapController;
+
+  int routeWidth = 4;
+  Color routeColor = Colors.blue;
+  final defaultMapZoom = 16.0;
+  final LatLng initialPosition = LatLng(25.276987, 55.296249);
+
+
+  final List<LatLng> points = [];
+  final List<String> placesNames = [];
+  get hasStart => points.length > 0;
+  get hasEnd => points.length > 1;
+
+  addPoint() {
+    if (cameraPosition != null) {
+      points.add(cameraPosition!);
+      placesNames.add(currentPlace ?? "Unknown place");
+      print('point added, points${points.toString()}');
+    }
+  }
+
+  addStep() {
+    if (cameraPosition != null) {
+      points.insert(points.length - 1, cameraPosition!);
+      placesNames.insert(points.length - 1, currentPlace ?? "Unknown place");
+      print('stop added, points${points.toString()}');
+    }
+  }
 
   goToUserLocation() async {
     await loadUserLocation();
@@ -35,26 +67,27 @@ class MapController extends ChangeNotifier {
 
   loadUserLocation() async {
     try {
-      currentPosition = await Geolocator.getCurrentPosition(
+      currentUserPosition = await Geolocator.getCurrentPosition(
         forceAndroidLocationManager: true,
         desiredAccuracy: LocationAccuracy.high,
       );
 
       print(
-          'Latitude: ${currentPosition!.latitude}, Longitude: ${currentPosition!.longitude}');
+          'Latitude: ${currentUserPosition!.latitude}, Longitude: ${currentUserPosition!.longitude}');
     } catch (e) {
       print('Error getting location: $e');
     }
   }
 
   moveToCurrentPosition() async {
-    if (currentPosition != null) {
+    print('cur ${currentUserPosition.toString()}');
+    if (currentUserPosition != null) {
       googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(
-              currentPosition!.latitude,
-              currentPosition!.longitude,
+              currentUserPosition!.latitude,
+              currentUserPosition!.longitude,
             ),
             zoom: defaultMapZoom,
           ),
@@ -63,18 +96,62 @@ class MapController extends ChangeNotifier {
     }
   }
 
-  // Future<void> _determinePosition() async {
-  //
-  //   Position position = await Geolocator.getCurrentPosition();
-  //   // setState(() {
-  //   // _searchController.text = '${position.latitude}, ${position.longitude}';
-  //   // _userLocationMarker = Marker(
-  //   //   markerId: MarkerId('currentLocation'),
-  //   //   position: _currentPosition,
-  //   //   draggable: true,
-  //   //   onDragEnd: (newPosition) {
-  //   //     _updatePosition(CameraPosition(target: newPosition, zoom: 14));
-  //   //   },
-  //   // );
-  // }
+  Future<String?> getPositionPlaceName() async {
+    currentPlace = await googleMapService.getPlaceName(cameraPosition!);
+    print('got place $currentPlace');
+    return currentPlace;
+  }
+
+  Polyline generatePolylineFromRoute(String route) {
+    return Polyline(
+      polylineId: PolylineId(points[1].toString()),
+      points: _convertToLatLng(_decodePoly(route)),
+      color: routeColor,
+      width: routeWidth,
+    );
+  }
+
+  List<LatLng> _convertToLatLng(List points) {
+    List<LatLng> result = <LatLng>[];
+    for (int i = 0; i < points.length; i++) {
+      if (i % 2 != 0) {
+        result.add(LatLng(points[i - 1], points[i]));
+      }
+    }
+    return result;
+  }
+
+  List _decodePoly(String poly) {
+    var list = poly.codeUnits;
+    var lList = [];
+    int index = 0;
+    int len = poly.length;
+    int c = 0;
+    // repeating until all attributes are decoded
+    do {
+      var shift = 0;
+      int result = 0;
+
+      // for decoding value of one attribute
+      do {
+        c = list[index] - 63;
+        result |= (c & 0x1F) << (shift * 5);
+        index++;
+        shift++;
+      } while (c >= 32);
+      /* if value is negative then bitwise not the value */
+      if (result & 1 == 1) {
+        result = ~result;
+      }
+      var result1 = (result >> 1) * 0.00001;
+      lList.add(result1);
+    } while (index < len);
+
+    /*adding to previous value as done in encoding */
+    for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 2];
+
+    print(lList.toString());
+
+    return lList;
+  }
 }

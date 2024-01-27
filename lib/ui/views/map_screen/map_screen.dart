@@ -1,3 +1,5 @@
+import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
+import 'package:bloomdeliveyapp/services/service_locator.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/bottom_sheet_navigator.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_builder.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
@@ -16,14 +18,14 @@ class DeliveryMapScreen extends StatefulWidget {
 }
 
 class DeliveryMapScreenState extends State<DeliveryMapScreen> {
-  late double toolbarHeight;
-  final LatLng _initialPosition =
-      LatLng(25.276987, 55.296249); // Example coordinates
-  final bottomSheetNavigatorKey = GlobalKey<BottomSheetNavigatorBuilderState>();
+  final bottomSheetNavigatorKey = GlobalKey<BottomSheetNavigatorState>();
+  final googleMapsService = serviceLocator<GoogleMapsServices>();
+
+  final Set<Polyline> polylines = {};
+  final Set<Marker> markers = {};
+  final showMidScreenPointer = true;
 
   final TextEditingController _searchController = TextEditingController();
-  // Declare _userLocationMarker as nullable
-  Marker? _userLocationMarker;
 
   void _showLocationServiceDialog() {
     // TODO: implement this
@@ -41,53 +43,37 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
         children: [
           MapBuilder(
               create: (_) => widget.mapController,
-              builder: (context, _) {
+              builder: (context, controller) {
                 return GoogleMap(
                   mapType: MapType.normal,
-                  myLocationButtonEnabled: true,
+                  myLocationButtonEnabled: false,
                   compassEnabled: true,
                   zoomControlsEnabled: false,
                   myLocationEnabled: true,
                   initialCameraPosition: CameraPosition(
-                    target: _initialPosition,
-                    zoom: 14.0,
+                    target: controller.initialPosition,
+                    zoom: controller.defaultMapZoom,
                   ),
-                  onMapCreated: (GoogleMapController controller) {
-                    widget.mapController.googleMapController = controller;
-                    widget.mapController.checkLocationPermission(_showLocationServiceDialog);
-                    widget.mapController.enableLocationService(_showLocationPermissionDialog);
-                    widget.mapController.goToUserLocation();
-                    // _setMapStyle();
+                  onMapCreated: (GoogleMapController googleMapController) {
+                    controller.googleMapController = googleMapController;
+                    controller
+                        .checkLocationPermission(_showLocationServiceDialog);
+                    controller
+                        .enableLocationService(_showLocationPermissionDialog);
+                    controller.goToUserLocation();
                   },
-                  markers: Set.of(_userLocationMarker != null
-                      ? [_userLocationMarker!]
-                      : []),
+                  onCameraMove: (position) {
+                    widget.mapController.cameraPosition = position.target;
+                  },
+                  onCameraIdle: () async {
+                    await widget.mapController.getPositionPlaceName();
+                    setState(() {
+                    });
+                  },
+                  markers: markers,
+                  polylines: polylines,
                 );
               }),
-          Positioned(
-            bottom: 50,
-            left: 20,
-            right: 20,
-            child: Column(
-              children: [
-                SizedBox(height: 10),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Enter Destination Address',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                    suffixIcon: Icon(Icons.search),
-                  ),
-                ),
-              ],
-            ),
-          ),
           Positioned(
             top: MediaQuery.of(context).padding.top +
                 10, // Adjust the position as needed
@@ -102,8 +88,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
                       // TODO: Open drawer or navigation menu
                     },
                   ),
-                  SizedBox(
-                      width: 10), // Space between the icon and the search box
+                  SizedBox(width: 5),
                   Expanded(
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -115,7 +100,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
                         controller: _searchController,
                         readOnly: true,
                         decoration: InputDecoration(
-                          hintText: 'Your Location',
+                          hintText: 'Search places',
                           border: InputBorder.none,
                           icon: Icon(Icons.location_searching),
                         ),
@@ -130,17 +115,52 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                width: 50,
+                height: 50,
+                margin: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(
+                    width: 2,
+                    color: Colors.green,
+                  ),
+                ),
+                child: Center(
+                  child: IconButton(
+                    onPressed: () {
+                      widget.mapController.goToUserLocation();
+                    },
+                    icon: Icon(
+                      Icons.my_location,
+                      size: 30,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ),
               BottomSheetNavigator(
                 bottomSheetNavigatorKey: bottomSheetNavigatorKey,
                 mapController: widget.mapController,
-                onMapChanged: (value) {
-                  setState(() {
-                    // showRandomIconButton = value;
-                  });
+                onMapChanged: () {
+                  updateMap(widget.mapController.points);
                 },
               ),
             ],
           ),
+          if (showMidScreenPointer)
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Icon(
+                  Icons.location_pin,
+                  size: 48.0,
+                  color: Colors.red,
+                ),
+              ),
+            )
         ],
       ),
     );
@@ -154,5 +174,43 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
         decoration: BoxDecoration(
           image: DecorationImage(image: AssetImage(img), fit: BoxFit.fitWidth),
         ));
+  }
+
+  void updateMap(List<dynamic> points) async {
+    // clear old stuff
+    markers.clear();
+    polylines.clear();
+
+    List<LatLng> po =
+        points.map((f) => LatLng(f.latitude, f.longitude)).toList();
+
+    late String route;
+    if (points.length == 2) {
+      route = await googleMapsService.getRouteCoordinatesBetweenTwoPoints(
+        po[0],
+        po[1],
+      );
+    } else if (points.length > 2) {
+      route = await googleMapsService.getRouteCoordinatesForMultiplePoints(po);
+    } else {
+      return;
+    }
+
+    final polyline = widget.mapController.generatePolylineFromRoute(route);
+
+    setState(() {
+      markers.addAll(
+        widget.mapController.points.map(
+          (point) => Marker(
+            markerId: MarkerId(point.toString()),
+            position: point,
+            infoWindow: InfoWindow(title: "step", snippet: "go here"),
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        ),
+      );
+
+      polylines.add(polyline);
+    });
   }
 }

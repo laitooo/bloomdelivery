@@ -1,9 +1,6 @@
+import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
-
-enum RideType {
-  motorCycle,
-  van,
-}
 
 class DeliveryOptions extends StatefulWidget {
   const DeliveryOptions({

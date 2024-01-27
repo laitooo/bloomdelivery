@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DropOffSelection extends StatefulWidget {
+  final String? currentPlace;
+  final void Function() onNext;
+
   const DropOffSelection({
     Key? key,
+    this.currentPlace,
     required this.onNext,
   }) : super(key: key);
 
-  final void Function() onNext;
 
   @override
   State<DropOffSelection> createState() => _DropOffSelectionState();
@@ -47,27 +50,17 @@ class _DropOffSelectionState extends State<DropOffSelection> {
               ),
             ),
             const SizedBox(width: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "location address 1",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+            Expanded(
+              child: Text(
+                widget.currentPlace ?? "Loading...",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
-                SizedBox(height: 6),
-                Text(
-                  "location address 1",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
