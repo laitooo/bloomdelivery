@@ -25,6 +25,10 @@ A simple delivery app built in Flutter (Dart).
 
 The UI Design can be found at [Uizard](https://app.uizard.io/p/f977280a/overview)
 
+## Gif screenshot
+
+![Gif screenshot](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/video.gif)
+
 ## Screenshots
 
 Home screen                | Selecting pickup, dropoff | Adding stops - 1          | Adding stops - 2
