@@ -1,4 +1,5 @@
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +18,24 @@ class DeliveryOptions extends StatefulWidget {
 }
 
 class _DeliveryOptionsState extends State<DeliveryOptions> {
-  RideType type = RideType.motorCycle;
+  late RideType type;
+
+  submitDeliveryOptions() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    // TODO: calculate real price instead of fixed price
+    viewModel.addDeliveryOption(
+      type,
+      type == RideType.motorCycle ? 90.75 : 120.50,
+    );
+    widget.onNext();
+  }
+
+  @override
+  void initState() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    type = viewModel.rideType ?? RideType.motorCycle;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +49,10 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.black,
+            color: context.theme.bottomSheetTitleColor,
           ),
         ),
-        const SizedBox(height: 0.0),
+        const SizedBox(height: 20.0),
         Text(
           "Available Rides",
           style: TextStyle(
@@ -52,10 +70,9 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 name: "Moto driver",
                 price: "90.75 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/delivery-van-7425887.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.motorCycle,
                 onPressed: () {
@@ -72,10 +89,9 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 name: "Van driver",
                 price: "120.50 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/scooter-delivering-realistic-motorbike-side-view-d-vehicle-square-box-shipping-restaurant-orders-fast-courier-white-216391649.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.van,
                 onPressed: () {
@@ -87,7 +103,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Pickup Contact",
           style: TextStyle(
@@ -141,7 +157,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Paying via",
           style: TextStyle(
@@ -169,7 +185,14 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement this
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Not implemented yet'),
+                  ),
+                );
+              },
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
@@ -178,11 +201,11 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 10.0),
+        const SizedBox(height: 20.0),
         Container(
           width: double.infinity, // Fills the width of its parent
           child: ElevatedButton(
-            onPressed: widget.onNext,
+            onPressed: submitDeliveryOptions,
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
             ),
@@ -240,7 +263,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
                 const SizedBox(height: 5.0),
@@ -250,7 +273,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
               ],

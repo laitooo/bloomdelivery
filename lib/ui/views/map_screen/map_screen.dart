@@ -126,6 +126,18 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
               ),
             ),
           ),
+          if (showMidScreenPointer)
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Icon(
+                  Icons.location_pin,
+                  size: 48.0,
+                  color: Colors.red,
+                ),
+              ),
+            ),
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,18 +207,6 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
               ),
             ],
           ),
-          if (showMidScreenPointer)
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 40),
-                child: Icon(
-                  Icons.location_pin,
-                  size: 48.0,
-                  color: Colors.red,
-                ),
-              ),
-            )
         ],
       ),
     );

@@ -31,6 +31,11 @@ class CreateOrderViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  addDeliveryOption(RideType rideType, double price) {
+    this.rideType = rideType;
+    this.fee = price;
+  }
+
   void createRequest() async {
     isCreating = true;
     notifyListeners();
