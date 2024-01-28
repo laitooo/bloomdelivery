@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/adding_steps.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/create_request_dialog.dart';
@@ -174,7 +175,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
               onTap: currentStep == 0 ? _onNext : null,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.theme.bottomSheetBackgroundColor,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(32.0),
                   ),
@@ -195,7 +196,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
                                     width: 64,
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey,
+                                      color: context.theme.bottomSheetSliderColor,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                   ),

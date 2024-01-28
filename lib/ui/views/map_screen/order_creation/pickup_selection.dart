@@ -1,3 +1,4 @@
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class PickupSelection extends StatefulWidget {
@@ -26,7 +27,7 @@ class _PickupSelectionState extends State<PickupSelection> {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.black,
+            color: context.theme.bottomSheetTitleColor,
           ),
         ),
         const SizedBox(height: 10.0),
@@ -44,6 +45,7 @@ class _PickupSelectionState extends State<PickupSelection> {
                 child: Icon(
                   Icons.location_pin,
                   size: 30,
+                  color: context.theme.bottomSheetIconColor1,
                 ),
               ),
             ),
@@ -52,7 +54,7 @@ class _PickupSelectionState extends State<PickupSelection> {
               child: Text(
                 widget.currentPlace ?? "Loading...",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: context.theme.bottomSheetTextColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),

@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/bottom_sheet_navigator.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_builder.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/search_places_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 final scaffoldKey2 = new GlobalKey<ScaffoldState>();
 
@@ -97,8 +99,11 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
               child: Container(
                 child: Row(
                   children: [
-                    Icon(Icons.menu, color: Colors.black),
-                    SizedBox(width: 5),
+                    Icon(
+                      Icons.menu,
+                      color: Colors.black,
+                    ),
+                    SizedBox(width: 20),
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -111,7 +116,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
                             enabled: false,
                             hintText: 'Search places',
                             border: InputBorder.none,
-                            icon: Icon(Icons.location_searching),
+                            icon: Icon(Icons.search_sharp),
                           ),
                         ),
                       ),
@@ -125,30 +130,61 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 50,
-                height: 50,
-                margin: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
-                  border: Border.all(
-                    width: 2,
-                    color: Colors.green,
-                  ),
-                ),
-                child: Center(
-                  child: IconButton(
-                    onPressed: () {
-                      widget.mapController.goToUserLocation();
-                    },
-                    icon: Icon(
-                      Icons.my_location,
-                      size: 30,
-                      color: Colors.green,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    margin: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        width: 2,
+                        color: Colors.green,
+                      ),
+                    ),
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () {
+                          widget.mapController.goToUserLocation();
+                        },
+                        icon: Icon(
+                          Icons.my_location,
+                          size: 30,
+                          color: Colors.green,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    margin: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        width: 2,
+                        color: Colors.green,
+                      ),
+                    ),
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () {
+                          Provider.of<ThemeProvider>(context, listen: false)
+                              .changeMode();
+                        },
+                        icon: Icon(
+                          Icons.nightlight,
+                          size: 30,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               BottomSheetNavigator(
                 bottomSheetNavigatorKey: bottomSheetNavigatorKey,
