@@ -17,9 +17,13 @@ class CreateOrderViewModel extends ChangeNotifier {
   String? error;
 
   List<LatLng> points = [];
+  // receiver options step
   String? receiverName, receiverPhoneNumber, deliveryInstructions;
+  // delivery options step
   RideType? rideType;
-  double? fee, tip;
+  double? fee;
+  // goods selection step
+  String? goods;
 
 
   final _orderService = serviceLocator<OrderServiceStrapi>();
@@ -34,6 +38,12 @@ class CreateOrderViewModel extends ChangeNotifier {
   addDeliveryOption(RideType rideType, double price) {
     this.rideType = rideType;
     this.fee = price;
+    notifyListeners();
+  }
+
+  addGoods(String goods) {
+    this.goods = goods;
+    notifyListeners();
   }
 
   void createRequest() async {

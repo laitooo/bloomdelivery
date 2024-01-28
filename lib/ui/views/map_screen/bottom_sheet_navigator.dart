@@ -25,19 +25,9 @@ enum _OrderStep {
   confirmingOrder,
 }
 
-const _regularOrderSteps = [
-  _OrderStep.pickupSelection,
-  _OrderStep.dropOffSelection,
-  _OrderStep.addingStops,
-  _OrderStep.receiverInfo,
-  _OrderStep.deliveryOptions,
-  _OrderStep.goodsSelection,
-  _OrderStep.confirmingOrder,
-];
-
 class BottomSheetNavigator extends StatefulWidget {
   final MapController mapController;
-  final Function() onMapChanged;
+  final Function(bool showButtons) onMapChanged;
   final GlobalKey bottomSheetNavigatorKey;
 
   BottomSheetNavigator({
@@ -54,8 +44,8 @@ class BottomSheetNavigator extends StatefulWidget {
 class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
   final createOrderViewModel = serviceLocator<CreateOrderViewModel>();
 
-  int currentStep = 0;
-  _OrderStep get step => _regularOrderSteps[currentStep];
+  _OrderStep currentStep = _OrderStep.pickupSelection;
+  _OrderStep get step => currentStep;
 
   @override
   void initState() {
@@ -64,30 +54,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
 
   void _onStepAdded() {
     widget.mapController.addStep();
-    widget.onMapChanged();
-  }
-
-  void _onNext() async {
-    if (currentStep == 0) {
-      widget.mapController.addPoint();
-      widget.onMapChanged();
-    }
-
-    if (currentStep == 1) {
-      widget.mapController.addPoint();
-      widget.onMapChanged();
-    }
-
-    if (currentStep == 2) {
-      createOrderViewModel.points = widget.mapController.points;
-    }
-
-    final numSteps = _regularOrderSteps.length;
-    if (currentStep + 1 != numSteps) {
-      setState(() {
-        ++currentStep;
-      });
-    }
+    widget.onMapChanged(true);
   }
 
   void _createOrder(BuildContext context) async {
@@ -100,17 +67,44 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
   }
 
   Future<bool> _bottomSheetOnWillPop() async {
-    if (currentStep == 2) {}
-    widget.onMapChanged();
-
-    if (currentStep > 0) {
-      setState(() {
-        --currentStep;
-      });
-      return false;
+    _OrderStep? previousStep;
+    switch (currentStep) {
+      case _OrderStep.pickupSelection:
+        break;
+      case _OrderStep.dropOffSelection:
+        previousStep = _OrderStep.pickupSelection;
+        break;
+      case _OrderStep.addingStops:
+        previousStep = _OrderStep.dropOffSelection;
+        break;
+      case _OrderStep.receiverInfo:
+        previousStep = _OrderStep.addingStops;
+        break;
+      case _OrderStep.deliveryOptions:
+        previousStep = _OrderStep.receiverInfo;
+        break;
+      case _OrderStep.goodsSelection:
+        previousStep = _OrderStep.deliveryOptions;
+        break;
+      case _OrderStep.confirmingOrder:
+        previousStep = _OrderStep.goodsSelection;
+        break;
     }
 
-    return await _showExitDialog(context);
+    if (previousStep == null) {
+      return await _showExitDialog(context);
+    } else {
+      setState(() {
+        currentStep = previousStep!;
+      });
+    }
+
+    if (previousStep == _OrderStep.goodsSelection) {
+      widget.onMapChanged(true);
+    } else if (previousStep == _OrderStep.confirmingOrder) {
+      widget.onMapChanged(false);
+    }
+    return false;
   }
 
   Future<bool> _showExitDialog(BuildContext context) {
@@ -181,8 +175,8 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: context.theme.bottomSheetBackgroundColor,
-                    // step 5 is a full screen, we won't need a border radius
-                    borderRadius: currentStep == 5
+                    // goods selection is a full screen, we won't need a border radius
+                    borderRadius: currentStep == _OrderStep.goodsSelection
                         ? null
                         : const BorderRadius.vertical(
                             top: Radius.circular(32.0),
@@ -191,8 +185,8 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // step 5 is a full screen, we won't need a slider
-                      currentStep == 5
+                      // goods selection is a full screen, we won't need a slider
+                      currentStep == _OrderStep.goodsSelection
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 8.0),
@@ -249,37 +243,68 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
     switch (step) {
       case _OrderStep.pickupSelection:
         return PickupSelection(
-          onNext: _onNext,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              widget.mapController.addPoint();
+              widget.onMapChanged(true);
+              currentStep = _OrderStep.dropOffSelection;
+            });
+          },
         );
       case _OrderStep.dropOffSelection:
         return DropOffSelection(
-          onNext: _onNext,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              widget.mapController.addPoint();
+              widget.onMapChanged(true);
+              currentStep = _OrderStep.addingStops;
+            });
+          },
         );
       case _OrderStep.addingStops:
         return AddingSteps(
           mapController: widget.mapController,
-          onNext: _onNext,
           onPointAdded: _onStepAdded,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              createOrderViewModel.points = widget.mapController.points;
+              currentStep = _OrderStep.receiverInfo;
+            });
+          },
         );
       case _OrderStep.receiverInfo:
         return ReceiverInfo(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              currentStep = _OrderStep.deliveryOptions;
+            });
+          },
         );
       case _OrderStep.deliveryOptions:
         return DeliveryOptions(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              widget.onMapChanged(false);
+              currentStep = _OrderStep.goodsSelection;
+            });
+          },
           onEditReceiverInformation: () {
             setState(() {
-              currentStep = 3;
+              currentStep = _OrderStep.receiverInfo;
             });
           },
         );
       case _OrderStep.goodsSelection:
         return GoodsSelection(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              widget.onMapChanged(true);
+              currentStep = _OrderStep.confirmingOrder;
+            });
+          },
         );
       case _OrderStep.confirmingOrder:
         return ConfirmingOrder(
