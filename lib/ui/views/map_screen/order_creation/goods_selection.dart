@@ -1,4 +1,7 @@
+import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 const goodsList = [
   "Timber/ Plywood/ Lamina",
@@ -32,27 +35,47 @@ class GoodsSelection extends StatefulWidget {
 }
 
 class _GoodsSelectionState extends State<GoodsSelection> {
-  String? selectedGood = null;
+  String? selectedGood;
+
+  submitGoods() {
+    if (selectedGood == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select goods type'),
+        ),
+      );
+      return;
+    }
+
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    viewModel.addGoods(selectedGood!);
+    widget.onNext();
+  }
+
+  @override
+  void initState() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    selectedGood = viewModel.goods;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-      padding: EdgeInsets.only(top: 30),
+      height: MediaQuery.of(context).size.height - 36,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10.0),
+          const SizedBox(height: 30),
           Text(
-            "Receiver Info",
+            "Goods type",
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: Colors.black,
+              color: context.theme.bottomSheetTitleColor,
             ),
           ),
-          const SizedBox(height: 10.0),
           Expanded(
             child: ListView(
               shrinkWrap: true,
@@ -67,7 +90,7 @@ class _GoodsSelectionState extends State<GoodsSelection> {
           Container(
             width: double.infinity, // Fills the width of its parent
             child: ElevatedButton(
-              onPressed: widget.onNext,
+              onPressed: submitGoods,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
               ),
@@ -98,12 +121,14 @@ class _GoodsSelectionState extends State<GoodsSelection> {
             Text(
               goodName,
               style: TextStyle(
-                color: Colors.black,
+                color: context.theme.bottomSheetTextColor,
               ),
             ),
             Radio(
               value: goodName,
               groupValue: selectedGood,
+              activeColor: context.theme.bottomSheetTextColor,
+              fillColor: MaterialStateProperty.all(context.theme.bottomSheetTextColor),
               onChanged: (value) {
                 setState(() {
                   selectedGood = value.toString();

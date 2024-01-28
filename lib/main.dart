@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
+import 'package:provider/provider.dart';
 import 'ui/views/splash.dart';
 
 void main() {
@@ -84,190 +86,193 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     //debugPaintSizeEnabled = true;
 
-    return MaterialApp(
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: tajribaBackgroundLighter,
-        snackBarTheme: SnackBarThemeData(),
-        /* bottomAppBarTheme: BottomAppBarTheme(
-          color: tajribaBackgroundLighter,
-          elevation: 2,
-        ),
-        bottomAppBarColor: tajribaBackgroundLighter, */
-        dialogTheme: DialogTheme(
-          backgroundColor: tajribaBackground,
-          contentTextStyle: TextStyle(
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MaterialApp(
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          scaffoldBackgroundColor: tajribaBackgroundLighter,
+          snackBarTheme: SnackBarThemeData(),
+          /* bottomAppBarTheme: BottomAppBarTheme(
+            color: tajribaBackgroundLighter,
+            elevation: 2,
+          ),
+          bottomAppBarColor: tajribaBackgroundLighter, */
+          dialogTheme: DialogTheme(
+            backgroundColor: tajribaBackground,
+            contentTextStyle: TextStyle(
+                fontFamily: 'Tajawal',
+                color: Colors.black87,
+                fontWeight: FontWeight.bold),
+            titleTextStyle: TextStyle(
               fontFamily: 'Tajawal',
               color: Colors.black87,
-              fontWeight: FontWeight.bold),
-          titleTextStyle: TextStyle(
-            fontFamily: 'Tajawal',
-            color: Colors.black87,
+            ),
+            //contentTextStyle: Theme.of(context).textTheme.bodyText2,
           ),
-          //contentTextStyle: Theme.of(context).textTheme.bodyText2,
-        ),
 
-        appBarTheme: AppBarTheme(
-          elevation: 0,
-          color: Colors.white,
-          centerTitle: true,
-          iconTheme: IconThemeData(
-            color: Colors.black,
+          appBarTheme: AppBarTheme(
+            elevation: 0,
+            color: Colors.white,
+            centerTitle: true,
+            iconTheme: IconThemeData(
+              color: Colors.black,
+            ),
+            toolbarTextStyle: TextTheme(
+              titleSmall: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Tajawal',
+              ),
+              headlineSmall: TextStyle().copyWith(
+                color: Colors.black,
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.bold,
+                //height: 2,
+              ),
+              titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Colors.black,
+                    fontFamily: 'Tajawal',
+                    fontWeight: FontWeight.bold,
+                    //height: 2,
+                  ),
+            ).bodyMedium,
+            titleTextStyle: TextTheme(
+              titleSmall: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Tajawal',
+              ),
+              headlineSmall: TextStyle().copyWith(
+                color: Colors.black,
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.bold,
+                //height: 2,
+              ),
+              titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Colors.black,
+                    fontFamily: 'Tajawal',
+                    fontWeight: FontWeight.bold,
+                    //height: 2,
+                  ),
+            ).titleLarge,
           ),
-          toolbarTextStyle: TextTheme(
+          cardTheme: CardTheme(
+            color: tajribaBackgroundLighter,
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+
+          primaryColor: primaryColor,
+          brightness: Brightness.light,
+          hintColor: accentColor,
+          fontFamily: 'Tajawal',
+          buttonTheme: ButtonThemeData(
+            buttonColor: primaryColor,
+            disabledColor: Colors.grey,
+            minWidth: 20,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          buttonBarTheme: ButtonBarThemeData(
+              buttonPadding: EdgeInsets.only(left: 8, right: 8),
+              buttonTextTheme: ButtonTextTheme.normal),
+
+          textTheme: TextTheme(
+            headlineMedium: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: tajribaPrimary,
+              fontFamily: 'Tajawal',
+              //fontSize: 18,
+            ),
+            headlineSmall: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+              fontFamily: 'Tajawal',
+            ),
+            titleLarge: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontFamily: 'Tajawal',
+              //height: 2,
+            ),
+            titleMedium: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+              fontFamily: 'Tajawal',
+            ),
             titleSmall: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+                //height: 2,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Tajawal'),
+            bodyLarge: TextStyle(
+              fontWeight: FontWeight.normal,
+              height: 1.5,
+              fontSize: 14,
               fontFamily: 'Tajawal',
+              color: Colors.black,
             ),
-            headlineSmall: TextStyle().copyWith(
-              color: Colors.black,
+            bodyMedium: TextStyle(
+              fontSize: 14,
+              //height: 1,
               fontFamily: 'Tajawal',
-              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+            labelLarge: TextStyle(
+              fontFamily: 'Tajawal',
               //height: 2,
+              color: primaryColor,
             ),
-            titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.black,
-                  fontFamily: 'Tajawal',
-                  fontWeight: FontWeight.bold,
-                  //height: 2,
-                ),
-          ).bodyMedium,
-          titleTextStyle: TextTheme(
-            titleSmall: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+          ),
+          //iconTheme: IconThemeData(color: Colors.grey, size: 100, opacity: 1,),
+
+          inputDecorationTheme: InputDecorationTheme(
+            /* enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey, width: 1.0),
+            ), */
+
+            contentPadding: EdgeInsetsDirectional.fromSTEB(12, 8, 12, 8),
+
+            enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.transparent),
+                borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: tajribaPrimary),
+                borderRadius: BorderRadius.circular(8)),
+            errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent),
+                borderRadius: BorderRadius.circular(8)),
+            focusedErrorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent),
+                borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: tajribaBackgroundLighter,
+
+            labelStyle: TextStyle(
+              fontSize: 12.0,
               fontFamily: 'Tajawal',
+              color: Colors.grey,
             ),
-            headlineSmall: TextStyle().copyWith(
-              color: Colors.black,
+            hintStyle: TextStyle(
+              fontSize: 12.0,
               fontFamily: 'Tajawal',
-              fontWeight: FontWeight.bold,
-              //height: 2,
+              color: Colors.grey,
             ),
-            titleLarge: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.black,
-                  fontFamily: 'Tajawal',
-                  fontWeight: FontWeight.bold,
-                  //height: 2,
-                ),
-          ).titleLarge,
+            //contentPadding: EdgeInsetsDirectional.only(top: 16),
+            //isDense: true,
+            prefixStyle: Theme.of(context).textTheme.bodyMedium,
+          ), colorScheme: ColorScheme.fromSwatch(primarySwatch: bluecareColor).copyWith(background: tajribaBackground),
         ),
-        cardTheme: CardTheme(
-          color: tajribaBackgroundLighter,
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-        ),
-
-        primaryColor: primaryColor,
-        brightness: Brightness.light,
-        hintColor: accentColor,
-        fontFamily: 'Tajawal',
-        buttonTheme: ButtonThemeData(
-          buttonColor: primaryColor,
-          disabledColor: Colors.grey,
-          minWidth: 20,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        buttonBarTheme: ButtonBarThemeData(
-            buttonPadding: EdgeInsets.only(left: 8, right: 8),
-            buttonTextTheme: ButtonTextTheme.normal),
-
-        textTheme: TextTheme(
-          headlineMedium: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: tajribaPrimary,
-            fontFamily: 'Tajawal',
-            //fontSize: 18,
-          ),
-          headlineSmall: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: primaryColor,
-            fontFamily: 'Tajawal',
-          ),
-          titleLarge: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            fontFamily: 'Tajawal',
-            //height: 2,
-          ),
-          titleMedium: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: primaryColor,
-            fontFamily: 'Tajawal',
-          ),
-          titleSmall: TextStyle(
-              //height: 2,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontFamily: 'Tajawal'),
-          bodyLarge: TextStyle(
-            fontWeight: FontWeight.normal,
-            height: 1.5,
-            fontSize: 14,
-            fontFamily: 'Tajawal',
-            color: Colors.black,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            //height: 1,
-            fontFamily: 'Tajawal',
-            color: Colors.grey,
-          ),
-          labelLarge: TextStyle(
-            fontFamily: 'Tajawal',
-            //height: 2,
-            color: primaryColor,
-          ),
-        ),
-        //iconTheme: IconThemeData(color: Colors.grey, size: 100, opacity: 1,),
-
-        inputDecorationTheme: InputDecorationTheme(
-          /* enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey, width: 1.0),
-          ), */
-
-          contentPadding: EdgeInsetsDirectional.fromSTEB(12, 8, 12, 8),
-
-          enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(8)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: tajribaPrimary),
-              borderRadius: BorderRadius.circular(8)),
-          errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent),
-              borderRadius: BorderRadius.circular(8)),
-          focusedErrorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent),
-              borderRadius: BorderRadius.circular(8)),
-          filled: true,
-          fillColor: tajribaBackgroundLighter,
-
-          labelStyle: TextStyle(
-            fontSize: 12.0,
-            fontFamily: 'Tajawal',
-            color: Colors.grey,
-          ),
-          hintStyle: TextStyle(
-            fontSize: 12.0,
-            fontFamily: 'Tajawal',
-            color: Colors.grey,
-          ),
-          //contentPadding: EdgeInsetsDirectional.only(top: 16),
-          //isDense: true,
-          prefixStyle: Theme.of(context).textTheme.bodyMedium,
-        ), colorScheme: ColorScheme.fromSwatch(primarySwatch: bluecareColor).copyWith(background: tajribaBackground),
+        home: Splash(),
+        navigatorObservers: [routeObserver],
       ),
-      home: Splash(),
-      navigatorObservers: [routeObserver],
     );
   }
 }

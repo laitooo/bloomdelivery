@@ -7,7 +7,7 @@ part of 'destination_model.dart';
 // **************************************************************************
 
 Destination _$DestinationFromJson(Map<String, dynamic> json) => Destination(
-      name: json['name'] as String,
+      name: json['name'] as String?,
       id: json['id'] as int?,
     );
 

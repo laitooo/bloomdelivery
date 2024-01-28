@@ -1,4 +1,5 @@
-import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/map_controller.dart';
 import 'package:flutter/material.dart';
 
 class AddingSteps extends StatefulWidget {
@@ -97,7 +98,6 @@ class _AddingStepsState extends State<AddingSteps> {
   }
 
   Widget listOfPoints(BuildContext context) {
-    print("lop : points ${widget.mapController.points}");
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,11 +106,11 @@ class _AddingStepsState extends State<AddingSteps> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Confirm details",
+              "Adding stops",
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 20,
-                color: Colors.black,
+                color: context.theme.bottomSheetTitleColor,
               ),
             ),
             TextButton(
@@ -132,6 +132,14 @@ class _AddingStepsState extends State<AddingSteps> {
         ),
         const SizedBox(height: 10.0),
         ...widget.mapController.placesNames.map((place) {
+          final index = widget.mapController.placesNames.indexOf(place);
+          final isLast = index == widget.mapController.placesNames.length - 1;
+          final color = index == 0
+              ? Colors.green
+              : isLast
+                  ? Colors.red
+                  : Colors.blue;
+
           return Container(
             padding: EdgeInsets.symmetric(vertical: 4),
             margin: EdgeInsets.symmetric(vertical: 5),
@@ -151,7 +159,7 @@ class _AddingStepsState extends State<AddingSteps> {
                   height: 20,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.green.withOpacity(0.5),
+                    color: color.withOpacity(0.5),
                   ),
                   child: Center(
                     child: Container(
@@ -159,7 +167,7 @@ class _AddingStepsState extends State<AddingSteps> {
                       height: 10,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.green,
+                        color: color,
                       ),
                     ),
                   ),
@@ -169,7 +177,7 @@ class _AddingStepsState extends State<AddingSteps> {
                   child: Text(
                     "${place}",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: context.theme.bottomSheetTextColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -177,7 +185,21 @@ class _AddingStepsState extends State<AddingSteps> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Icon(Icons.edit),
+                GestureDetector(
+                  onTap: () {
+                    // TODO: Implement this
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Not implemented yet'),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.edit,
+                    size: 16,
+                    color: context.theme.bottomSheetTextColor,
+                  ),
+                ),
                 const SizedBox(width: 10),
               ],
             ),

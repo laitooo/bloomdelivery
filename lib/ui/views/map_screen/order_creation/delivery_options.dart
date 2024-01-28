@@ -1,24 +1,45 @@
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryOptions extends StatefulWidget {
+  final void Function() onNext;
+  final void Function() onEditReceiverInformation;
+
   const DeliveryOptions({
     Key? key,
     required this.onNext,
+    required this.onEditReceiverInformation,
   }) : super(key: key);
-
-  final void Function() onNext;
 
   @override
   State<DeliveryOptions> createState() => _DeliveryOptionsState();
 }
 
 class _DeliveryOptionsState extends State<DeliveryOptions> {
-  RideType type = RideType.motorCycle;
+  late RideType type;
+
+  submitDeliveryOptions() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    // TODO: calculate real price instead of fixed price
+    viewModel.addDeliveryOption(
+      type,
+      type == RideType.motorCycle ? 90.75 : 120.50,
+    );
+    widget.onNext();
+  }
+
+  @override
+  void initState() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    type = viewModel.rideType ?? RideType.motorCycle;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,10 +49,10 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.black,
+            color: context.theme.bottomSheetTitleColor,
           ),
         ),
-        const SizedBox(height: 0.0),
+        const SizedBox(height: 20.0),
         Text(
           "Available Rides",
           style: TextStyle(
@@ -49,10 +70,9 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 name: "Moto driver",
                 price: "90.75 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/scooter-delivering-realistic-motorbike-side-view-d-vehicle-square-box-shipping-restaurant-orders-fast-courier-white-216391649.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.motorCycle,
                 onPressed: () {
@@ -69,10 +89,9 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 name: "Van driver",
                 price: "120.50 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/delivery-van-7425887.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.van,
                 onPressed: () {
@@ -84,7 +103,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Pickup Contact",
           style: TextStyle(
@@ -100,7 +119,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             Row(
               children: [
                 Text(
-                  "Ahmed",
+                  viewModel.receiverName!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -109,7 +128,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 ),
                 const Spacer(),
                 Text(
-                  "+971555555555",
+                  viewModel.receiverPhoneNumber!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -118,7 +137,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 ),
                 const SizedBox(width: 10),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: widget.onEditReceiverInformation,
                   child: Icon(
                     Icons.edit,
                     size: 16,
@@ -128,8 +147,8 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              "Instructions: Tell me how long will it take",
+            Text(
+              viewModel.deliveryInstructions!,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
@@ -138,7 +157,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Paying via",
           style: TextStyle(
@@ -166,7 +185,14 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement this
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Not implemented yet'),
+                  ),
+                );
+              },
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
@@ -175,11 +201,11 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             ),
           ],
         ),
-        const SizedBox(height: 10.0),
+        const SizedBox(height: 20.0),
         Container(
           width: double.infinity, // Fills the width of its parent
           child: ElevatedButton(
-            onPressed: widget.onNext,
+            onPressed: submitDeliveryOptions,
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
             ),
@@ -226,7 +252,7 @@ class _RideTypeButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            image,
+            Flexible(child: image),
             const SizedBox(width: 10),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -237,7 +263,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
                 const SizedBox(height: 5.0),
@@ -247,7 +273,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
               ],

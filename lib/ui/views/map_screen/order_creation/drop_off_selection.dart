@@ -1,3 +1,4 @@
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class DropOffSelection extends StatefulWidget {
@@ -9,7 +10,6 @@ class DropOffSelection extends StatefulWidget {
     this.currentPlace,
     required this.onNext,
   }) : super(key: key);
-
 
   @override
   State<DropOffSelection> createState() => _DropOffSelectionState();
@@ -27,7 +27,7 @@ class _DropOffSelectionState extends State<DropOffSelection> {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.black,
+            color: context.theme.bottomSheetTitleColor,
           ),
         ),
         const SizedBox(height: 10.0),
@@ -46,6 +46,7 @@ class _DropOffSelectionState extends State<DropOffSelection> {
                 child: Icon(
                   Icons.location_pin,
                   size: 30,
+                  color: context.theme.bottomSheetIconColor,
                 ),
               ),
             ),
@@ -54,7 +55,7 @@ class _DropOffSelectionState extends State<DropOffSelection> {
               child: Text(
                 widget.currentPlace ?? "Loading...",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: context.theme.bottomSheetTextColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),

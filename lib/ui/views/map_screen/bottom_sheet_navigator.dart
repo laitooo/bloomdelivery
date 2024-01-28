@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/map_controller.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/adding_steps.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/create_request_dialog.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/delivery_options.dart';
@@ -12,6 +13,7 @@ import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/pickup_select
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/receiver_info.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 enum _OrderStep {
   pickupSelection,
@@ -22,16 +24,6 @@ enum _OrderStep {
   goodsSelection,
   confirmingOrder,
 }
-
-const _regularOrderSteps = [
-  _OrderStep.pickupSelection,
-  _OrderStep.dropOffSelection,
-  _OrderStep.addingStops,
-  _OrderStep.receiverInfo,
-  _OrderStep.deliveryOptions,
-  _OrderStep.goodsSelection,
-  _OrderStep.confirmingOrder,
-];
 
 class BottomSheetNavigator extends StatefulWidget {
   final MapController mapController;
@@ -52,8 +44,8 @@ class BottomSheetNavigator extends StatefulWidget {
 class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
   final createOrderViewModel = serviceLocator<CreateOrderViewModel>();
 
-  int currentStep = 0;
-  _OrderStep get step => _regularOrderSteps[currentStep];
+  _OrderStep currentStep = _OrderStep.pickupSelection;
+  _OrderStep get step => currentStep;
 
   @override
   void initState() {
@@ -63,27 +55,6 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
   void _onStepAdded() {
     widget.mapController.addStep();
     widget.onMapChanged();
-  }
-
-  void _onNext() async {
-    if (currentStep == 0) {
-      createOrderViewModel.start = widget.mapController.cameraPosition;
-      widget.mapController.addPoint();
-      widget.onMapChanged();
-    }
-
-    if (currentStep == 1) {
-      createOrderViewModel.end = widget.mapController.cameraPosition;
-      widget.mapController.addPoint();
-      widget.onMapChanged();
-    }
-
-    final numSteps = _regularOrderSteps.length;
-    if (currentStep + 1 != numSteps) {
-      setState(() {
-        ++currentStep;
-      });
-    }
   }
 
   void _createOrder(BuildContext context) async {
@@ -96,17 +67,50 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
   }
 
   Future<bool> _bottomSheetOnWillPop() async {
-    if (currentStep == 2) {}
-    widget.onMapChanged();
-
-    if (currentStep > 0) {
-      setState(() {
-        --currentStep;
-      });
-      return false;
+    _OrderStep? previousStep;
+    switch (currentStep) {
+      case _OrderStep.pickupSelection:
+        break;
+      case _OrderStep.dropOffSelection:
+        previousStep = _OrderStep.pickupSelection;
+        break;
+      case _OrderStep.addingStops:
+        previousStep = _OrderStep.dropOffSelection;
+        break;
+      case _OrderStep.receiverInfo:
+        previousStep = _OrderStep.addingStops;
+        break;
+      case _OrderStep.deliveryOptions:
+        previousStep = _OrderStep.receiverInfo;
+        break;
+      case _OrderStep.goodsSelection:
+        previousStep = _OrderStep.deliveryOptions;
+        break;
+      case _OrderStep.confirmingOrder:
+        previousStep = _OrderStep.goodsSelection;
+        break;
     }
 
-    return await _showExitDialog(context);
+    // remove points on map when clicking the back button
+    if (currentStep == _OrderStep.addingStops) {
+      widget.mapController.removeAllExceptOrigin();
+      widget.onMapChanged();
+    } else if (currentStep == _OrderStep.dropOffSelection) {
+      widget.mapController.removeOrigin();
+      widget.onMapChanged();
+    }
+
+    if (previousStep == null) {
+      // if there's no previous page show Exit app dialog
+      return await _showExitDialog(context);
+    } else {
+      // otherwise go to previous page
+      setState(() {
+        currentStep = previousStep!;
+      });
+    }
+
+    return false;
   }
 
   Future<bool> _showExitDialog(BuildContext context) {
@@ -163,109 +167,229 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: widget.bottomSheetNavigatorKey,
-      // ignore: deprecated_member_use
-      child: WillPopScope(
-        onWillPop: _bottomSheetOnWillPop,
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: currentStep == 0 ? _onNext : null,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(32.0),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+    return Provider(
+      create: (_) => createOrderViewModel,
+      child: Consumer<CreateOrderViewModel>(builder: (_, viewModel, __) {
+        return Container(
+          key: widget.bottomSheetNavigatorKey,
+          // TODO: get rid of deprecated code
+          // ignore: deprecated_member_use
+          child: WillPopScope(
+            onWillPop: _bottomSheetOnWillPop,
+            child: Stack(
+              children: [
+                Column(
                   children: [
-                    currentStep == 5
-                        ? SizedBox()
-                        : Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const SizedBox(),
-                                Center(
-                                  child: Container(
-                                    width: 64,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  ),
+                    if (currentStep != _OrderStep.goodsSelection)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            margin: const EdgeInsetsDirectional.fromSTEB(
+                                20, 0, 20, 20),
+                            decoration: BoxDecoration(
+                              color: context.theme.bottomSheetIconBackgroundColor,
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.green,
+                              ),
+                            ),
+                            child: Center(
+                              child: IconButton(
+                                onPressed: () {
+                                  widget.mapController.goToUserLocation();
+                                },
+                                icon: Icon(
+                                  Icons.my_location,
+                                  size: 30,
+                                  color: Colors.green,
                                 ),
-                                const SizedBox(),
-                              ],
+                              ),
                             ),
                           ),
-                    AnimatedSize(
-                      alignment: Alignment.bottomCenter,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 33.0,
-                          vertical: currentStep == 5 ? 0 : 18.0,
+                          Container(
+                            width: 50,
+                            height: 50,
+                            margin: const EdgeInsetsDirectional.fromSTEB(
+                                20, 0, 20, 20),
+                            decoration: BoxDecoration(
+                              color: context.theme.bottomSheetIconBackgroundColor,
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.green,
+                              ),
+                            ),
+                            child: Center(
+                              child: IconButton(
+                                onPressed: () {
+                                  Provider.of<ThemeProvider>(context,
+                                      listen: false)
+                                      .changeMode();
+                                },
+                                icon: Icon(
+                                  Icons.nightlight,
+                                  size: 30,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.theme.bottomSheetBackgroundColor,
+                        // goods selection is a full screen, we won't need a border radius
+                        borderRadius: currentStep == _OrderStep.goodsSelection
+                            ? null
+                            : const BorderRadius.vertical(
+                          top: Radius.circular(32.0),
                         ),
-                        child: Builder(
-                          builder: (context) {
-                            return _buildOrderStep(context);
-                          },
-                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // goods selection is a full screen, we won't need a slider
+                          currentStep == _OrderStep.goodsSelection
+                              ? SizedBox()
+                              : Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const SizedBox(),
+                                      Center(
+                                        child: Container(
+                                          width: 64,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            color: context
+                                                .theme.bottomSheetSliderColor,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(),
+                                    ],
+                                  ),
+                                ),
+                          AnimatedSize(
+                            alignment: Alignment.bottomCenter,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeIn,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 33.0,
+                                vertical: currentStep == 5 ? 0 : 18.0,
+                              ),
+                              child: Builder(
+                                builder: (context) {
+                                  return _buildOrderStep(_, viewModel);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 
-  Widget _buildOrderStep(BuildContext context) {
+  Widget _buildOrderStep(BuildContext context, CreateOrderViewModel viewModel) {
     switch (step) {
       case _OrderStep.pickupSelection:
         return PickupSelection(
-          onNext: _onNext,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              widget.mapController.addPoint();
+              widget.onMapChanged();
+              currentStep = _OrderStep.dropOffSelection;
+            });
+          },
         );
       case _OrderStep.dropOffSelection:
         return DropOffSelection(
-          onNext: _onNext,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              widget.mapController.addPoint();
+              widget.onMapChanged();
+              currentStep = _OrderStep.addingStops;
+            });
+          },
         );
       case _OrderStep.addingStops:
         return AddingSteps(
           mapController: widget.mapController,
-          onNext: _onNext,
           onPointAdded: _onStepAdded,
           currentPlace: widget.mapController.currentPlace,
+          onNext: () {
+            setState(() {
+              createOrderViewModel.points = widget.mapController.points;
+              currentStep = _OrderStep.receiverInfo;
+            });
+          },
         );
       case _OrderStep.receiverInfo:
         return ReceiverInfo(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              currentStep = _OrderStep.deliveryOptions;
+            });
+          },
         );
       case _OrderStep.deliveryOptions:
         return DeliveryOptions(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              widget.onMapChanged();
+              currentStep = _OrderStep.goodsSelection;
+            });
+          },
+          onEditReceiverInformation: () {
+            setState(() {
+              currentStep = _OrderStep.receiverInfo;
+            });
+          },
         );
       case _OrderStep.goodsSelection:
         return GoodsSelection(
-          onNext: _onNext,
+          onNext: () {
+            setState(() {
+              widget.onMapChanged();
+              currentStep = _OrderStep.confirmingOrder;
+            });
+          },
         );
       case _OrderStep.confirmingOrder:
         return ConfirmingOrder(
           onNext: () {
             _createOrder(context);
+          },
+          onEditReceiverInformation: () {
+            setState(() {
+              currentStep = _OrderStep.receiverInfo;
+            });
+          },
+          onEditGoods: () {
+            setState(() {
+              currentStep = _OrderStep.goodsSelection;
+            });
           },
         );
       default:
