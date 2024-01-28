@@ -25,26 +25,6 @@ A simple delivery app built in Flutter (Dart).
 
 The UI Design can be found at [Uizard](https://app.uizard.io/p/f977280a/overview)
 
-## Dependencies
-<details>
-     <summary> Click to expand </summary>
-
-* [flutter_bloc](https://pub.dev/packages/flutter_bloc)
-* [shared_preferences](https://pub.dev/packages/shared_preferences)
-* [flutter_svg](https://pub.dev/packages/flutter_svg)
-* [get_it](https://pub.dev/packages/get_it)
-* [paginated_live_list](https://github.com/AkramIzz/paginated_live_list)
-* [percent_indicator](https://pub.dev/packages/percent_indicator)
-* [flutter_rating_bar](https://pub.dev/packages/flutter_rating_bar)
-* [syncfusion_flutter_sliders](https://pub.dev/packages/syncfusion_flutter_sliders)
-* [country_picker](https://pub.dev/packages/country_picker)
-* [fast_i18n](https://pub.dev/packages/fast_i18n)
-* [build_runner](https://pub.dev/packages/build_runner)
-* [json_serializable](https://pub.dev/packages/json_serializable)
-* [freezed](https://pub.dev/packages/freezed)
-
-</details>
-
 ## Screenshots
 
 Home screen                | Selecting pickup, dropoff | Adding stops - 1          | Adding stops - 2
