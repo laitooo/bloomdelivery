@@ -4,7 +4,6 @@ import 'package:bloomdeliveyapp/business_logic/models/response/response_error_me
 import 'package:bloomdeliveyapp/services/order/order_service_strapi.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 enum RideType {
@@ -17,13 +16,20 @@ class CreateOrderViewModel extends ChangeNotifier {
   bool isCreated = false;
   String? error;
 
-  LatLng? start, end;
-  String? receiverName, receiverPhoneNumber, instructions, goods;
+  List<LatLng> points = [];
+  String? receiverName, receiverPhoneNumber, deliveryInstructions;
   RideType? rideType;
   double? fee, tip;
 
 
   final _orderService = serviceLocator<OrderServiceStrapi>();
+
+  addReceiverInfo(String receiverName, String receiverPhone, String receiverInstruction) {
+    this.receiverName = receiverName;
+    this.receiverPhoneNumber = receiverPhone;
+    this.deliveryInstructions = receiverInstruction;
+    notifyListeners();
+  }
 
   void createRequest() async {
     isCreating = true;

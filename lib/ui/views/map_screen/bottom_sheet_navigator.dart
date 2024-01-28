@@ -13,6 +13,7 @@ import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/pickup_select
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/receiver_info.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 enum _OrderStep {
   pickupSelection,
@@ -68,15 +69,17 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
 
   void _onNext() async {
     if (currentStep == 0) {
-      createOrderViewModel.start = widget.mapController.cameraPosition;
       widget.mapController.addPoint();
       widget.onMapChanged();
     }
 
     if (currentStep == 1) {
-      createOrderViewModel.end = widget.mapController.cameraPosition;
       widget.mapController.addPoint();
       widget.onMapChanged();
+    }
+
+    if (currentStep == 2) {
+      createOrderViewModel.points = widget.mapController.points;
     }
 
     final numSteps = _regularOrderSteps.length;
@@ -164,75 +167,85 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: widget.bottomSheetNavigatorKey,
-      // ignore: deprecated_member_use
-      child: WillPopScope(
-        onWillPop: _bottomSheetOnWillPop,
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: currentStep == 0 ? _onNext : null,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.theme.bottomSheetBackgroundColor,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(32.0),
+    return Provider(
+      create: (_) => createOrderViewModel,
+      child: Consumer<CreateOrderViewModel>(builder: (_, viewModel, __) {
+        return Container(
+          key: widget.bottomSheetNavigatorKey,
+          // TODO: get rid of deprecated code
+          // ignore: deprecated_member_use
+          child: WillPopScope(
+            onWillPop: _bottomSheetOnWillPop,
+            child: Stack(
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.theme.bottomSheetBackgroundColor,
+                    // step 5 is a full screen, we won't need a border radius
+                    borderRadius: currentStep == 5
+                        ? null
+                        : const BorderRadius.vertical(
+                            top: Radius.circular(32.0),
+                          ),
                   ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    currentStep == 5
-                        ? SizedBox()
-                        : Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const SizedBox(),
-                                Center(
-                                  child: Container(
-                                    width: 64,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      color: context.theme.bottomSheetSliderColor,
-                                      borderRadius: BorderRadius.circular(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // step 5 is a full screen, we won't need a slider
+                      currentStep == 5
+                          ? SizedBox()
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const SizedBox(),
+                                  Center(
+                                    child: Container(
+                                      width: 64,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: context
+                                            .theme.bottomSheetSliderColor,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(),
-                              ],
+                                  const SizedBox(),
+                                ],
+                              ),
                             ),
+                      AnimatedSize(
+                        alignment: Alignment.bottomCenter,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeIn,
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 33.0,
+                            vertical: currentStep == 5 ? 0 : 18.0,
                           ),
-                    AnimatedSize(
-                      alignment: Alignment.bottomCenter,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 33.0,
-                          vertical: currentStep == 5 ? 0 : 18.0,
-                        ),
-                        child: Builder(
-                          builder: (context) {
-                            return _buildOrderStep(context);
-                          },
+                          child: Builder(
+                            builder: (context) {
+                              return _buildOrderStep(_, viewModel);
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 
-  Widget _buildOrderStep(BuildContext context) {
+  Widget _buildOrderStep(BuildContext context, CreateOrderViewModel viewModel) {
     switch (step) {
       case _OrderStep.pickupSelection:
         return PickupSelection(
@@ -258,6 +271,11 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
       case _OrderStep.deliveryOptions:
         return DeliveryOptions(
           onNext: _onNext,
+          onEditReceiverInformation: () {
+            setState(() {
+              currentStep = 3;
+            });
+          },
         );
       case _OrderStep.goodsSelection:
         return GoodsSelection(

@@ -1,14 +1,16 @@
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/confirming_order.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DeliveryOptions extends StatefulWidget {
+  final void Function() onNext;
+  final void Function() onEditReceiverInformation;
+
   const DeliveryOptions({
     Key? key,
     required this.onNext,
+    required this.onEditReceiverInformation,
   }) : super(key: key);
-
-  final void Function() onNext;
 
   @override
   State<DeliveryOptions> createState() => _DeliveryOptionsState();
@@ -19,6 +21,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +103,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             Row(
               children: [
                 Text(
-                  "Ahmed",
+                  viewModel.receiverName!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -109,7 +112,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 ),
                 const Spacer(),
                 Text(
-                  "+971555555555",
+                  viewModel.receiverPhoneNumber!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -118,7 +121,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 ),
                 const SizedBox(width: 10),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: widget.onEditReceiverInformation,
                   child: Icon(
                     Icons.edit,
                     size: 16,
@@ -128,8 +131,8 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              "Instructions: Tell me how long will it take",
+            Text(
+              viewModel.deliveryInstructions!,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
