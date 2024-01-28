@@ -185,10 +185,20 @@ class _AddingStepsState extends State<AddingSteps> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Icon(
-                  Icons.edit,
-                  size: 16,
-                  color: context.theme.bottomSheetTextColor,
+                GestureDetector(
+                  onTap: () {
+                    // TODO: Implement this
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Not implemented yet'),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.edit,
+                    size: 16,
+                    color: context.theme.bottomSheetTextColor,
+                  ),
                 ),
                 const SizedBox(width: 10),
               ],

@@ -50,8 +50,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             ),
             onMapCreated: (GoogleMapController googleMapController) async {
               mapController.setGoogleController(googleMapController);
-              mapController
-                  .checkLocationPermission(_showLocationServiceDialog);
+              mapController.checkLocationPermission(_showLocationServiceDialog);
               mapController
                   .enableLocationService(_showLocationPermissionDialog);
               mapController.goToUserLocation();
@@ -170,7 +169,20 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
       );
     } else if (points.length > 2) {
       route = await googleMapsService.getRouteCoordinatesForMultiplePoints(po);
+    } else if (points.length == 1) {
+      setState(() {
+        markers.add(
+          Marker(
+            markerId: MarkerId(points[0].toString()),
+            position: points[0],
+            infoWindow: InfoWindow(title: "step", snippet: "go here"),
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        );
+      });
+      return;
     } else {
+      setState(() {});
       return;
     }
 

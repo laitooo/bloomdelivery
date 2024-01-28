@@ -91,9 +91,20 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
         break;
     }
 
+    // remove points on map when clicking the back button
+    if (currentStep == _OrderStep.addingStops) {
+      widget.mapController.removeAllExceptOrigin();
+      widget.onMapChanged();
+    } else if (currentStep == _OrderStep.dropOffSelection) {
+      widget.mapController.removeOrigin();
+      widget.onMapChanged();
+    }
+
     if (previousStep == null) {
+      // if there's no previous page show Exit app dialog
       return await _showExitDialog(context);
     } else {
+      // otherwise go to previous page
       setState(() {
         currentStep = previousStep!;
       });

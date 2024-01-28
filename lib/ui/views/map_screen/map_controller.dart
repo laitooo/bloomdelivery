@@ -19,7 +19,6 @@ class MapController {
   final defaultMapZoom = 16.0;
   final LatLng initialPosition = LatLng(25.276987, 55.296249);
 
-
   final List<LatLng> points = [];
   final List<String> placesNames = [];
   get hasStart => points.length > 0;
@@ -41,6 +40,16 @@ class MapController {
       points.insert(points.length - 1, cameraPosition!);
       placesNames.insert(points.length - 1, currentPlace ?? "Unknown place");
     }
+  }
+
+  void removeOrigin() {
+    points.clear();
+    placesNames.clear();
+  }
+
+  void removeAllExceptOrigin() {
+    points.removeRange(1, points.length);
+    placesNames.removeRange(1, placesNames.length);
   }
 
   goToUserLocation() async {
@@ -74,7 +83,6 @@ class MapController {
         forceAndroidLocationManager: true,
         desiredAccuracy: LocationAccuracy.high,
       );
-
     } catch (e) {
       print('Error getting location: $e');
     }
