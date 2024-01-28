@@ -13,10 +13,9 @@ Trip _$TripFromJson(Map<String, dynamic> json) => Trip(
       date: json['date'] as String,
       arrival: json['arrival'] as String,
       price: (json['price'] as num).toDouble(),
-      
       from: Trip.fromDestinationJson(json['from']),
-      to:  Trip.fromDestinationJson(json['to']),
-      pickups: json['pickups'] as String,
+      to: Trip.fromDestinationJson(json['to']),
+      pickups: json['pickups'] as String?,
       bookings: Trip.fromBookingsJson(json['bookings']),
       seats: json['seats'] as int,
       chairStatus: (json['chairStatus'] as List<dynamic>?)

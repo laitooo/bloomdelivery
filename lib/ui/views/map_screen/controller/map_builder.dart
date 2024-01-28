@@ -1,5 +1,6 @@
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MapBuilder extends StatefulWidget {
   final MapController Function(BuildContext context) create;
@@ -26,16 +27,16 @@ class _MapBuilderState extends State<MapBuilder> {
   void initState() {
     super.initState();
     controller = widget.create(context);
-    //controller.moveToCurrentLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
+    return ChangeNotifierProvider(
+      create: (_) => controller,
+      child: Consumer<MapController>(
+          builder: (context, loginScreenViewModel, child) {
         return widget.builder(context, controller);
-      },
+      }),
     );
   }
 }

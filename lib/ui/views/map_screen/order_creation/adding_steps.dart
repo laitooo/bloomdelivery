@@ -97,7 +97,6 @@ class _AddingStepsState extends State<AddingSteps> {
   }
 
   Widget listOfPoints(BuildContext context) {
-    print("lop : points ${widget.mapController.points}");
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

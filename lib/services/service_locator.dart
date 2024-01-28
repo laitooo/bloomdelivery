@@ -1,4 +1,5 @@
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/business_logic/view_models/places/search_screen_viewmodel.dart';
 import 'package:bloomdeliveyapp/business_logic/view_models/user/usermenu_screen_viewmodel.dart';
 import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
 import 'package:bloomdeliveyapp/services/order/order_service_strapi.dart';
@@ -39,4 +40,7 @@ void setupServiceLocator() {
 
   serviceLocator
       .registerFactory<CreateOrderViewModel>(() => CreateOrderViewModel());
+
+  serviceLocator
+      .registerFactory<SearchScreenViewModel>(() => SearchScreenViewModel());
 }

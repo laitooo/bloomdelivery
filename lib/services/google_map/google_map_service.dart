@@ -1,3 +1,4 @@
+import 'package:bloomdeliveyapp/business_logic/models/place/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -43,5 +44,26 @@ class GoogleMapsServices {
     var response = await http.get(Uri.parse(url));
     print('loaded place $response');
     return (jsonDecode(response.body))['results'][0]['formatted_address'];
+  }
+
+  Future<List<Place>> searchPlace(String query) async {
+    String apiUrl =
+        'https://maps.googleapis.com/maps/api/place/textsearch/json?query=';
+
+    String url = '$apiUrl${query.replaceAll(' ', '%20')}&key=$apiKey';
+
+    var response = await http.get(Uri.parse(url));
+    print('search url ${url}');
+    print('search response ${response.body}');
+
+    List<dynamic> results = (jsonDecode(response.body))['results'];
+
+    return results.map((r) {
+      return Place(
+        name: r['name'],
+        longitude: r['geometry']['location']['lng'],
+        latitude: r['geometry']['location']['lat'],
+      );
+    }).toList();
   }
 }

@@ -11,7 +11,8 @@ class MapController extends ChangeNotifier {
   LatLng? cameraPosition;
   String? currentPlace;
   Position? currentUserPosition;
-  late GoogleMapController googleMapController;
+
+  GoogleMapController? googleMapController;
 
   int routeWidth = 4;
   Color routeColor = Colors.blue;
@@ -24,11 +25,15 @@ class MapController extends ChangeNotifier {
   get hasStart => points.length > 0;
   get hasEnd => points.length > 1;
 
+  void setGoogleController(googleMapController) {
+    this.googleMapController = googleMapController;
+    notifyListeners();
+  }
+
   addPoint() {
     if (cameraPosition != null) {
       points.add(cameraPosition!);
       placesNames.add(currentPlace ?? "Unknown place");
-      print('point added, points${points.toString()}');
     }
   }
 
@@ -36,7 +41,6 @@ class MapController extends ChangeNotifier {
     if (cameraPosition != null) {
       points.insert(points.length - 1, cameraPosition!);
       placesNames.insert(points.length - 1, currentPlace ?? "Unknown place");
-      print('stop added, points${points.toString()}');
     }
   }
 
@@ -72,17 +76,14 @@ class MapController extends ChangeNotifier {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      print(
-          'Latitude: ${currentUserPosition!.latitude}, Longitude: ${currentUserPosition!.longitude}');
     } catch (e) {
       print('Error getting location: $e');
     }
   }
 
   moveToCurrentPosition() async {
-    print('cur ${currentUserPosition.toString()}');
-    if (currentUserPosition != null) {
-      googleMapController.animateCamera(
+    if (currentUserPosition != null && googleMapController != null) {
+      googleMapController!.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(
@@ -96,9 +97,21 @@ class MapController extends ChangeNotifier {
     }
   }
 
+  moveCameraToPosition(LatLng position) async {
+    if (googleMapController != null) {
+      googleMapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: position,
+            zoom: defaultMapZoom,
+          ),
+        ),
+      );
+    }
+  }
+
   Future<String?> getPositionPlaceName() async {
     currentPlace = await googleMapService.getPlaceName(cameraPosition!);
-    print('got place $currentPlace');
     return currentPlace;
   }
 
@@ -149,9 +162,6 @@ class MapController extends ChangeNotifier {
 
     /*adding to previous value as done in encoding */
     for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 2];
-
-    print(lList.toString());
-
     return lList;
   }
 }

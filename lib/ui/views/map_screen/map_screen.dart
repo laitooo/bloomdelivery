@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/bottom_sheet_navigator.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_builder.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/search_places_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -24,8 +27,6 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
   final Set<Polyline> polylines = {};
   final Set<Marker> markers = {};
   final showMidScreenPointer = true;
-
-  final TextEditingController _searchController = TextEditingController();
 
   void _showLocationServiceDialog() {
     // TODO: implement this
@@ -54,60 +55,69 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
                     target: controller.initialPosition,
                     zoom: controller.defaultMapZoom,
                   ),
-                  onMapCreated: (GoogleMapController googleMapController) {
-                    controller.googleMapController = googleMapController;
-                    controller
+                  onMapCreated:
+                      (GoogleMapController googleMapController) async {
+                    widget.mapController
+                        .setGoogleController(googleMapController);
+                    widget.mapController
                         .checkLocationPermission(_showLocationServiceDialog);
-                    controller
+                    widget.mapController
                         .enableLocationService(_showLocationPermissionDialog);
-                    controller.goToUserLocation();
+                    widget.mapController.goToUserLocation();
                   },
                   onCameraMove: (position) {
                     widget.mapController.cameraPosition = position.target;
                   },
                   onCameraIdle: () async {
                     await widget.mapController.getPositionPlaceName();
-                    setState(() {
-                    });
+                    setState(() {});
                   },
                   markers: markers,
                   polylines: polylines,
                 );
               }),
           Positioned(
-            top: MediaQuery.of(context).padding.top +
-                10, // Adjust the position as needed
+            top: MediaQuery.of(context).padding.top + 10,
             left: 10,
             right: 10,
-            child: Container(
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.menu, color: Colors.black),
-                    onPressed: () {
-                      // TODO: Open drawer or navigation menu
+            child: GestureDetector(
+              onTap: () async {
+                final results = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return SearchPlacesScreen();
                     },
                   ),
-                  SizedBox(width: 5),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: 'Search places',
-                          border: InputBorder.none,
-                          icon: Icon(Icons.location_searching),
+                );
+
+                if (results is LatLng) {
+                  widget.mapController.moveCameraToPosition(results);
+                }
+              },
+              child: Container(
+                child: Row(
+                  children: [
+                    Icon(Icons.menu, color: Colors.black),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            enabled: false,
+                            hintText: 'Search places',
+                            border: InputBorder.none,
+                            icon: Icon(Icons.location_searching),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -212,5 +222,11 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
 
       polylines.add(polyline);
     });
+  }
+
+  @override
+  void dispose() {
+    widget.mapController.googleMapController?.dispose();
+    super.dispose();
   }
 }
