@@ -27,7 +27,7 @@ enum _OrderStep {
 
 class BottomSheetNavigator extends StatefulWidget {
   final MapController mapController;
-  final Function(bool showButtons) onMapChanged;
+  final Function() onMapChanged;
   final GlobalKey bottomSheetNavigatorKey;
 
   BottomSheetNavigator({
@@ -54,7 +54,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
 
   void _onStepAdded() {
     widget.mapController.addStep();
-    widget.onMapChanged(true);
+    widget.onMapChanged();
   }
 
   void _createOrder(BuildContext context) async {
@@ -99,11 +99,6 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
       });
     }
 
-    if (previousStep == _OrderStep.goodsSelection) {
-      widget.onMapChanged(true);
-    } else if (previousStep == _OrderStep.confirmingOrder) {
-      widget.onMapChanged(false);
-    }
     return false;
   }
 
@@ -172,64 +167,128 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
             onWillPop: _bottomSheetOnWillPop,
             child: Stack(
               children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.theme.bottomSheetBackgroundColor,
-                    // goods selection is a full screen, we won't need a border radius
-                    borderRadius: currentStep == _OrderStep.goodsSelection
-                        ? null
-                        : const BorderRadius.vertical(
-                            top: Radius.circular(32.0),
-                          ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // goods selection is a full screen, we won't need a slider
-                      currentStep == _OrderStep.goodsSelection
-                          ? SizedBox()
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const SizedBox(),
-                                  Center(
-                                    child: Container(
-                                      width: 64,
-                                      height: 4,
-                                      decoration: BoxDecoration(
-                                        color: context
-                                            .theme.bottomSheetSliderColor,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(),
-                                ],
+                Column(
+                  children: [
+                    if (currentStep != _OrderStep.goodsSelection)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            margin: const EdgeInsetsDirectional.fromSTEB(
+                                20, 0, 20, 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.green,
                               ),
                             ),
-                      AnimatedSize(
-                        alignment: Alignment.bottomCenter,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeIn,
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 33.0,
-                            vertical: currentStep == 5 ? 0 : 18.0,
+                            child: Center(
+                              child: IconButton(
+                                onPressed: () {
+                                  widget.mapController.goToUserLocation();
+                                },
+                                icon: Icon(
+                                  Icons.my_location,
+                                  size: 30,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Builder(
-                            builder: (context) {
-                              return _buildOrderStep(_, viewModel);
-                            },
+                          Container(
+                            width: 50,
+                            height: 50,
+                            margin: const EdgeInsetsDirectional.fromSTEB(
+                                20, 0, 20, 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.green,
+                              ),
+                            ),
+                            child: Center(
+                              child: IconButton(
+                                onPressed: () {
+                                  Provider.of<ThemeProvider>(context,
+                                      listen: false)
+                                      .changeMode();
+                                },
+                                icon: Icon(
+                                  Icons.nightlight,
+                                  size: 30,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
                           ),
+                        ],
+                      ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.theme.bottomSheetBackgroundColor,
+                        // goods selection is a full screen, we won't need a border radius
+                        borderRadius: currentStep == _OrderStep.goodsSelection
+                            ? null
+                            : const BorderRadius.vertical(
+                          top: Radius.circular(32.0),
                         ),
                       ),
-                    ],
-                  ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // goods selection is a full screen, we won't need a slider
+                          currentStep == _OrderStep.goodsSelection
+                              ? SizedBox()
+                              : Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const SizedBox(),
+                                      Center(
+                                        child: Container(
+                                          width: 64,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            color: context
+                                                .theme.bottomSheetSliderColor,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(),
+                                    ],
+                                  ),
+                                ),
+                          AnimatedSize(
+                            alignment: Alignment.bottomCenter,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeIn,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 33.0,
+                                vertical: currentStep == 5 ? 0 : 18.0,
+                              ),
+                              child: Builder(
+                                builder: (context) {
+                                  return _buildOrderStep(_, viewModel);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -247,7 +306,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
           onNext: () {
             setState(() {
               widget.mapController.addPoint();
-              widget.onMapChanged(true);
+              widget.onMapChanged();
               currentStep = _OrderStep.dropOffSelection;
             });
           },
@@ -258,7 +317,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
           onNext: () {
             setState(() {
               widget.mapController.addPoint();
-              widget.onMapChanged(true);
+              widget.onMapChanged();
               currentStep = _OrderStep.addingStops;
             });
           },
@@ -287,7 +346,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
         return DeliveryOptions(
           onNext: () {
             setState(() {
-              widget.onMapChanged(false);
+              widget.onMapChanged();
               currentStep = _OrderStep.goodsSelection;
             });
           },
@@ -301,7 +360,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
         return GoodsSelection(
           onNext: () {
             setState(() {
-              widget.onMapChanged(true);
+              widget.onMapChanged();
               currentStep = _OrderStep.confirmingOrder;
             });
           },

@@ -71,7 +71,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 price: "90.75 \$",
                 // image: Image(image: NetworkImage('')),
                 image: Image.network(
-                  "https://thumbs.dreamstime.com/b/delivery-van-7425887.jpg",
+                  "https://thumbs.dreamstime.com/b/scooter-delivering-realistic-motorbike-side-view-d-vehicle-square-box-shipping-restaurant-orders-fast-courier-white-216391649.jpg",
                   height: 50,
                 ),
                 isSelected: type == RideType.motorCycle,
@@ -90,7 +90,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                 price: "120.50 \$",
                 // image: Image(image: NetworkImage('')),
                 image: Image.network(
-                  "https://thumbs.dreamstime.com/b/scooter-delivering-realistic-motorbike-side-view-d-vehicle-square-box-shipping-restaurant-orders-fast-courier-white-216391649.jpg",
+                  "https://thumbs.dreamstime.com/b/delivery-van-7425887.jpg",
                   height: 50,
                 ),
                 isSelected: type == RideType.van,
@@ -252,7 +252,7 @@ class _RideTypeButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            image,
+            Flexible(child: image),
             const SizedBox(width: 10),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,

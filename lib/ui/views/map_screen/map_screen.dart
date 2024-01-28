@@ -21,9 +21,6 @@ class DeliveryMapScreen extends StatefulWidget {
 }
 
 class DeliveryMapScreenState extends State<DeliveryMapScreen> {
-  // show/hide location and night mode icon buttons
-  bool showFloatingIconButtons = true;
-
   final bottomSheetNavigatorKey = GlobalKey<BottomSheetNavigatorState>();
   final googleMapsService = serviceLocator<GoogleMapsServices>();
 
@@ -143,73 +140,11 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (showFloatingIconButtons)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      margin:
-                          const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(40),
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.green,
-                        ),
-                      ),
-                      child: Center(
-                        child: IconButton(
-                          onPressed: () {
-                            widget.mapController.goToUserLocation();
-                          },
-                          icon: Icon(
-                            Icons.my_location,
-                            size: 30,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 50,
-                      height: 50,
-                      margin:
-                          const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(40),
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.green,
-                        ),
-                      ),
-                      child: Center(
-                        child: IconButton(
-                          onPressed: () {
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .changeMode();
-                          },
-                          icon: Icon(
-                            Icons.nightlight,
-                            size: 30,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               BottomSheetNavigator(
                 bottomSheetNavigatorKey: bottomSheetNavigatorKey,
                 mapController: widget.mapController,
-                onMapChanged: (bool showButtons) {
+                onMapChanged: () {
                   updateMap(widget.mapController.points);
-                  setState(() {
-                    showFloatingIconButtons = showButtons;
-                  });
                 },
               ),
             ],
