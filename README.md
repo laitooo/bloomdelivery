@@ -49,15 +49,15 @@ The UI Design can be found at [Uizard](https://app.uizard.io/p/f977280a/overview
 
 Home screen                | Selecting pickup, dropoff | Adding stops - 1          | Adding stops - 2
 :-------------------------:|:---------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|:-------------------------:
-![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/1.jpg)| ![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/2.jpg) | ![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/3.jpg) |![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/4.jpg)|
+![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/1.png)| ![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/2.png) | ![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/3.png) |![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/4.png)|
 
 Receiver information       | Delivery options          | Goods selection           |  Confirming order
 :-------------------------:|:---------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|:-------------------------:
-![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/5.jpg)| ![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/6.jpg) | ![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/7.jpg) |![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/8.jpg)|
+![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/5.png)| ![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/6.png) | ![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/7.png) |![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/8.png)|
 
-Creating order             |                                Search screen                                 | Register screen - 5       | Home screen
-:-------------------------:|:----------------------------------------------------------------------------:|:-------------------------:|:-------------------------:
-![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/9.jpg)| ![](https://github.com/laitooo/bloomdelivery/blob/master/screenshots/10.jpg) |![](https://github.com/laitooo/bibliotheque/blob/master/screenshots/11.jpg)|![](https://github.com/laitooo/bibliotheque/blob/master/screenshots/12.jpg)|
+Creating order             | Search screen                                 
+:-------------------------:|:----------------------------------------------------------------------------:
+![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/9.png)| ![](https://github.com/laitooo/bloomdelivery/blob/main/screenshots/10.png)
 
 
 ## Getting started
