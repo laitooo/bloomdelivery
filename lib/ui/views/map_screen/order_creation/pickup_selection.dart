@@ -45,7 +45,7 @@ class _PickupSelectionState extends State<PickupSelection> {
                 child: Icon(
                   Icons.location_pin,
                   size: 30,
-                  color: context.theme.bottomSheetIconColor1,
+                  color: context.theme.bottomSheetIconColor,
                 ),
               ),
             ),

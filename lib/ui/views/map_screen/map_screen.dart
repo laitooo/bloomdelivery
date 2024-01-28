@@ -1,19 +1,14 @@
 import 'package:bloomdeliveyapp/services/google_map/google_map_service.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
-import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/bottom_sheet_navigator.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_builder.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/map_controller.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/search_places_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provider/provider.dart';
 
 final scaffoldKey2 = new GlobalKey<ScaffoldState>();
 
 class DeliveryMapScreen extends StatefulWidget {
-  final mapController = MapController();
-
   DeliveryMapScreen({Key? key}) : super(key: key);
 
   @override
@@ -21,6 +16,7 @@ class DeliveryMapScreen extends StatefulWidget {
 }
 
 class DeliveryMapScreenState extends State<DeliveryMapScreen> {
+  final mapController = MapController();
   final bottomSheetNavigatorKey = GlobalKey<BottomSheetNavigatorState>();
   final googleMapsService = serviceLocator<GoogleMapsServices>();
 
@@ -42,40 +38,34 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
       key: scaffoldKey2,
       body: Stack(
         children: [
-          MapBuilder(
-              create: (_) => widget.mapController,
-              builder: (context, controller) {
-                return GoogleMap(
-                  mapType: MapType.normal,
-                  myLocationButtonEnabled: false,
-                  compassEnabled: true,
-                  zoomControlsEnabled: false,
-                  myLocationEnabled: true,
-                  initialCameraPosition: CameraPosition(
-                    target: controller.initialPosition,
-                    zoom: controller.defaultMapZoom,
-                  ),
-                  onMapCreated:
-                      (GoogleMapController googleMapController) async {
-                    widget.mapController
-                        .setGoogleController(googleMapController);
-                    widget.mapController
-                        .checkLocationPermission(_showLocationServiceDialog);
-                    widget.mapController
-                        .enableLocationService(_showLocationPermissionDialog);
-                    widget.mapController.goToUserLocation();
-                  },
-                  onCameraMove: (position) {
-                    widget.mapController.cameraPosition = position.target;
-                  },
-                  onCameraIdle: () async {
-                    await widget.mapController.getPositionPlaceName();
-                    setState(() {});
-                  },
-                  markers: markers,
-                  polylines: polylines,
-                );
-              }),
+          GoogleMap(
+            mapType: MapType.normal,
+            myLocationButtonEnabled: false,
+            compassEnabled: true,
+            zoomControlsEnabled: false,
+            myLocationEnabled: true,
+            initialCameraPosition: CameraPosition(
+              target: mapController.initialPosition,
+              zoom: mapController.defaultMapZoom,
+            ),
+            onMapCreated: (GoogleMapController googleMapController) async {
+              mapController.setGoogleController(googleMapController);
+              mapController
+                  .checkLocationPermission(_showLocationServiceDialog);
+              mapController
+                  .enableLocationService(_showLocationPermissionDialog);
+              mapController.goToUserLocation();
+            },
+            onCameraMove: (position) {
+              mapController.cameraPosition = position.target;
+            },
+            onCameraIdle: () async {
+              await mapController.getPositionPlaceName();
+              setState(() {});
+            },
+            markers: markers,
+            polylines: polylines,
+          ),
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 10,
@@ -91,7 +81,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
                 );
 
                 if (results is LatLng) {
-                  widget.mapController.moveCameraToPosition(results);
+                  mapController.moveCameraToPosition(results);
                 }
               },
               child: Container(
@@ -142,9 +132,9 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
             children: [
               BottomSheetNavigator(
                 bottomSheetNavigatorKey: bottomSheetNavigatorKey,
-                mapController: widget.mapController,
+                mapController: mapController,
                 onMapChanged: () {
-                  updateMap(widget.mapController.points);
+                  updateMap(mapController.points);
                 },
               ),
             ],
@@ -184,11 +174,11 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
       return;
     }
 
-    final polyline = widget.mapController.generatePolylineFromRoute(route);
+    final polyline = mapController.generatePolylineFromRoute(route);
 
     setState(() {
       markers.addAll(
-        widget.mapController.points.map(
+        mapController.points.map(
           (point) => Marker(
             markerId: MarkerId(point.toString()),
             position: point,
@@ -204,7 +194,7 @@ class DeliveryMapScreenState extends State<DeliveryMapScreen> {
 
   @override
   void dispose() {
-    widget.mapController.googleMapController?.dispose();
+    mapController.googleMapController?.dispose();
     super.dispose();
   }
 }

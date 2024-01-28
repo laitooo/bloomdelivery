@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
 import 'package:bloomdeliveyapp/services/service_locator.dart';
 import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
-import 'package:bloomdeliveyapp/ui/views/map_screen/controller/map_controller.dart';
+import 'package:bloomdeliveyapp/ui/views/map_screen/map_controller.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/adding_steps.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/create_request_dialog.dart';
 import 'package:bloomdeliveyapp/ui/views/map_screen/order_creation/delivery_options.dart';
@@ -179,7 +179,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
                             margin: const EdgeInsetsDirectional.fromSTEB(
                                 20, 0, 20, 20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.theme.bottomSheetIconBackgroundColor,
                               borderRadius: BorderRadius.circular(40),
                               border: Border.all(
                                 width: 2,
@@ -205,7 +205,7 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
                             margin: const EdgeInsetsDirectional.fromSTEB(
                                 20, 0, 20, 20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.theme.bottomSheetIconBackgroundColor,
                               borderRadius: BorderRadius.circular(40),
                               border: Border.all(
                                 width: 2,
@@ -369,6 +369,16 @@ class BottomSheetNavigatorState extends State<BottomSheetNavigator> {
         return ConfirmingOrder(
           onNext: () {
             _createOrder(context);
+          },
+          onEditReceiverInformation: () {
+            setState(() {
+              currentStep = _OrderStep.receiverInfo;
+            });
+          },
+          onEditGoods: () {
+            setState(() {
+              currentStep = _OrderStep.goodsSelection;
+            });
           },
         );
       default:

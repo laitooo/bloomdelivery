@@ -11,8 +11,8 @@ abstract class AppThemeData {
   Color get bottomSheetTitleColor;
   Color get bottomSheetBackgroundColor;
   Color get bottomSheetSliderColor;
-  Color get bottomSheetIconColor1;
-  Color get bottomSheetIconColor2;
+  Color get bottomSheetIconColor;
+  Color get bottomSheetIconBackgroundColor;
 }
 
 class LightThemeData extends AppThemeData {
@@ -20,8 +20,8 @@ class LightThemeData extends AppThemeData {
   get bottomSheetTitleColor => Colors.black;
   get bottomSheetBackgroundColor => Color(0xFFF0F6E8);
   get bottomSheetSliderColor => Colors.grey;
-  get bottomSheetIconColor1 => Colors.black;
-  get bottomSheetIconColor2 => Colors.green;
+  get bottomSheetIconColor => Colors.black;
+  get bottomSheetIconBackgroundColor => Colors.white;
 }
 
 class DarkThemeData extends AppThemeData {
@@ -29,6 +29,6 @@ class DarkThemeData extends AppThemeData {
   get bottomSheetTitleColor => Colors.white;
   get bottomSheetBackgroundColor => const Color(0xFF00151A);
   get bottomSheetSliderColor => Colors.grey.shade600;
-  get bottomSheetIconColor1 => Colors.white;
-  get bottomSheetIconColor2 => Colors.green;
+  get bottomSheetIconColor => Colors.white;
+  get bottomSheetIconBackgroundColor => const Color(0xFF00151A);
 }

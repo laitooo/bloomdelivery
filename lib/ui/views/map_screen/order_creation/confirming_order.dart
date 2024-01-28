@@ -1,34 +1,60 @@
 import 'package:bloomdeliveyapp/business_logic/view_models/order/create_order_viewmodel.dart';
+import 'package:bloomdeliveyapp/ui/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class ConfirmingOrder extends StatefulWidget {
+  final void Function() onNext;
+  final void Function() onEditReceiverInformation;
+  final void Function() onEditGoods;
+
   const ConfirmingOrder({
     Key? key,
     required this.onNext,
+    required this.onEditReceiverInformation,
+    required this.onEditGoods,
   }) : super(key: key);
-
-  final void Function() onNext;
 
   @override
   State<ConfirmingOrder> createState() => _ConfirmingOrderState();
 }
 
 class _ConfirmingOrderState extends State<ConfirmingOrder> {
-  RideType type = RideType.motorCycle;
+  late RideType type;
+
+  submitDeliveryOptions() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    // TODO: calculate real price instead of fixed price
+    viewModel.addDeliveryOption(
+      type,
+      type == RideType.motorCycle ? 90.75 : 120.50,
+    );
+    widget.onNext();
+  }
+
+  @override
+  void initState() {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+    type = viewModel.rideType ?? RideType.motorCycle;
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<CreateOrderViewModel>(context, listen: false);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Delivery options",
+          "Confirming order",
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.black,
+            color: context.theme.bottomSheetTitleColor,
           ),
         ),
         const SizedBox(height: 0.0),
@@ -49,10 +75,9 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
                 name: "Moto driver",
                 price: "90.75 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/scooter-delivering-realistic-motorbike-side-view-d-vehicle-square-box-shipping-restaurant-orders-fast-courier-white-216391649.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.motorCycle,
                 onPressed: () {
@@ -69,10 +94,9 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
                 name: "Van driver",
                 price: "120.50 \$",
                 // image: Image(image: NetworkImage('')),
-                image: Container(
-                  width: 50,
+                image: Image.network(
+                  "https://thumbs.dreamstime.com/b/delivery-van-7425887.jpg",
                   height: 50,
-                  color: Colors.blue,
                 ),
                 isSelected: type == RideType.van,
                 onPressed: () {
@@ -84,7 +108,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Pickup Contact",
           style: TextStyle(
@@ -100,7 +124,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             Row(
               children: [
                 Text(
-                  "Ahmed",
+                  viewModel.receiverName!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -109,7 +133,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
                 ),
                 const Spacer(),
                 Text(
-                  "+971555555555",
+                  viewModel.receiverPhoneNumber!,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
@@ -118,7 +142,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
                 ),
                 const SizedBox(width: 10),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: widget.onEditReceiverInformation,
                   child: Icon(
                     Icons.edit,
                     size: 16,
@@ -128,8 +152,8 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              "Instructions: Tell me how long will it take",
+            Text(
+              viewModel.deliveryInstructions!,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
@@ -138,7 +162,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             ),
           ],
         ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 30.0),
         Text(
           "Paying via",
           style: TextStyle(
@@ -166,7 +190,14 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement this
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Not implemented yet'),
+                  ),
+                );
+              },
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
@@ -189,7 +220,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
           children: [
             Expanded(
               child: Text(
-                "Electrical/ Electronics/ Home Appliances (2)",
+                viewModel.goods!,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
@@ -200,7 +231,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             ),
             const SizedBox(width: 20),
             GestureDetector(
-              onTap: () {},
+              onTap: widget.onEditGoods,
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
@@ -209,7 +240,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
             ),
           ],
         ),
-        const SizedBox(height: 10.0),
+        const SizedBox(height: 20.0),
         Container(
           width: double.infinity, // Fills the width of its parent
           child: ElevatedButton(
@@ -218,7 +249,7 @@ class _ConfirmingOrderState extends State<ConfirmingOrder> {
               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
             ),
             child: Text(
-              'Choose Goods Type',
+              'Ride now',
               style: TextStyle(fontSize: 16.0, color: Colors.white),
             ),
           ),
@@ -260,7 +291,7 @@ class _RideTypeButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            image,
+            Expanded(child: image),
             const SizedBox(width: 10),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -271,7 +302,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
                 const SizedBox(height: 5.0),
@@ -281,7 +312,7 @@ class _RideTypeButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: context.theme.bottomSheetTextColor,
                   ),
                 ),
               ],

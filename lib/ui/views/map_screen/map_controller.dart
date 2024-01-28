@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class MapController extends ChangeNotifier {
+class MapController {
   final googleMapService = serviceLocator<GoogleMapsServices>();
 
   LatLng? cameraPosition;
@@ -27,7 +27,6 @@ class MapController extends ChangeNotifier {
 
   void setGoogleController(googleMapController) {
     this.googleMapController = googleMapController;
-    notifyListeners();
   }
 
   addPoint() {
