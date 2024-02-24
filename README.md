@@ -58,4 +58,6 @@ To run the project do the following steps:
 
 4- run "flutter pub run build_runner build".
 
-5- run the project.
+5- Add your google map api key to 'android/src/app/main/AndroidManifest.xml'.
+
+6- run the project.
