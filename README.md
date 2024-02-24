@@ -1,5 +1,7 @@
 # BloomDelivery
 
+This project was build for the pupose of job assignment in 4 days.
+
 A simple delivery app built in Flutter (Dart).
 * The project separates the data logic from the UI logic and uses Provider as a middle-man.
 * The project also uses Provider for a state manager.
